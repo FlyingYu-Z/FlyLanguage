@@ -25,7 +25,9 @@ protected:
 
 public:
     TypeInClassRemember *typeInClassRemember = new TypeInClassRemember();
+
     Ast2IrConvertor(FlyScriptParser::FileContext *fileContext);
+
     ~Ast2IrConvertor();
 
     static string_view typeContextToString(FlyScriptParser::TypeContext *typeContext);

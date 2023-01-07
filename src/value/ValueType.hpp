@@ -25,15 +25,23 @@ X(T_int, "int", FlyScriptLexer::Type_int) \
 X(T_boolean, "boolean", FlyScriptLexer::Type_boolean) \
 
 
-class ValueType{
+class ValueType {
 public:
     enum : uint8_t {
 #define X(enumName, name, value) enumName = value,
-            VALUE_TYPE
+        VALUE_TYPE
 #undef X
     };
 
-    static const char* getName(int value) {
+    static vector<int> getValueTypeList() {
+        vector<int> typeList = vector<int>();
+#define X(enumName, name, value) typeList.push_back(enumName);
+        VALUE_TYPE
+#undef X
+        return typeList;
+    }
+
+    static const char *getName(int value) {
         switch (value) {
 #define X(enumName, name, value) case value: return name;
             VALUE_TYPE

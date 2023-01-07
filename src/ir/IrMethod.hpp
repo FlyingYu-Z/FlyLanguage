@@ -91,6 +91,8 @@ private:
     vector<IrMethod> methods;
 
 public:
+    StringPool *stringPool = new StringPool();
+
     FileClass(){
 
     }

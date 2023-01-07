@@ -73,6 +73,7 @@ file(GLOB SOURCE_FILES
         "${PROJECT_SOURCE_DIR}/src/convertor/*.hpp"
         "${PROJECT_SOURCE_DIR}/src/value/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/value/*.hpp"
+        "${PROJECT_SOURCE_DIR}/src/ir/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/ir/*.hpp"
         "${PROJECT_SOURCE_DIR}/src/ir/*.h"
         "${PROJECT_SOURCE_DIR}/src/utils/*.h"

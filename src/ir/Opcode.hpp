@@ -33,7 +33,7 @@ public:
 
     }
 
-    static const char* getName(int value) {
+    static const char *getName(int value) {
         switch (value) {
 #define X_OPCODE(enumName, name, value) case value: return name;
             OPCODE
@@ -41,6 +41,13 @@ public:
         }
         throw std::runtime_error("unknown opcode value");
     }
+
+public:
+    static class Value {
+#define X_OPCODE(enumName, name, value) public: static const int enumName = value;
+        OPCODE
+#undef X_OPCODE
+    };
 
 
 };
