@@ -9,7 +9,7 @@
 #include "ValueType.hpp"
 #include "TypeInClassRemember.h"
 #include "TypeInMethodRemember.h"
-#include "IrMethod.hpp"
+#include "IrMethod.h"
 #include "MethodRegister.h"
 
 

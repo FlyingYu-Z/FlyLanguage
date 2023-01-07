@@ -5,7 +5,7 @@
 #ifndef FLYLANGUAGE_CONSTINTINSTRUCTION_H
 #define FLYLANGUAGE_CONSTINTINSTRUCTION_H
 
-#include "Instruction.hpp"
+#include "Instruction.h"
 
 class ConstIntInstruction : public Instruction {
 

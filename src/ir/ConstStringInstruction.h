@@ -5,7 +5,7 @@
 #ifndef FLYLANGUAGE_CONSTSTRINGINSTRUCTION_H
 #define FLYLANGUAGE_CONSTSTRINGINSTRUCTION_H
 
-#include "Instruction.hpp"
+#include "Instruction.h"
 #include <fmt/printf.h>
 
 

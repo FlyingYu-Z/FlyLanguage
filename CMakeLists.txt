@@ -21,9 +21,11 @@ add_definitions(-DANTLR4CPP_STATIC)
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -save-temps")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -save-temps -fpermissive")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps -fpermissive")
+
+#set(CMAKE_CXX_FLAGS " -std=c++0x")
 
 # Specify the version of the antlr4 library needed for this project.
 # By default the latest version of antlr4 will be used.  You can specify a

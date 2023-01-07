@@ -2,8 +2,8 @@
 // Created by flying on 2023/1/6.
 //
 
-#ifndef FLYLANGUAGE_OPCODE_H
-#define FLYLANGUAGE_OPCODE_H
+#ifndef FLYLANGUAGE_OPCODE_HPP
+#define FLYLANGUAGE_OPCODE_HPP
 
 #include <map>
 
@@ -43,8 +43,9 @@ public:
     }
 
 public:
-    static class Value {
-#define X_OPCODE(enumName, name, value) public: static const int enumName = value;
+    class Value {
+    public:
+#define X_OPCODE(enumName, name, value) static const uint8_t enumName = value;
         OPCODE
 #undef X_OPCODE
     };
@@ -53,4 +54,4 @@ public:
 };
 
 
-#endif //FLYLANGUAGE_OPCODE_H
+#endif //FLYLANGUAGE_OPCODE_HPP

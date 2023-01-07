@@ -2,10 +2,10 @@
 // Created by flying on 2023/1/6.
 //
 
-#ifndef FLYLANGUAGE_IRMETHOD_HPP
-#define FLYLANGUAGE_IRMETHOD_HPP
+#ifndef FLYLANGUAGE_IRMETHOD_H
+#define FLYLANGUAGE_IRMETHOD_H
 
-#include "AllInstructions.hpp"
+#include "AllInstructions.h"
 
 using namespace std;
 
@@ -112,4 +112,4 @@ public:
 };
 
 
-#endif //FLYLANGUAGE_IRMETHOD_HPP
+#endif //FLYLANGUAGE_IRMETHOD_H

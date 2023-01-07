@@ -5,8 +5,11 @@
 #ifndef FLYLANGUAGE_ALLINSTRUCTIONS_H
 #define FLYLANGUAGE_ALLINSTRUCTIONS_H
 
-#include "ConstStringInstruction.hpp"
-#include "ConstIntInstruction.hpp"
+#include "ConstStringInstruction.h"
+#include "ConstIntInstruction.h"
+
+
+static string_view dump(Instruction *instruction);
 
 
 #endif //FLYLANGUAGE_ALLINSTRUCTIONS_H
