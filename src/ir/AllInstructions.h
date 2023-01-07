@@ -9,7 +9,7 @@
 #include "ConstIntInstruction.h"
 
 
-static string_view dump(Instruction *instruction);
+extern string_view dump(Instruction instruction);
 
 
 #endif //FLYLANGUAGE_ALLINSTRUCTIONS_H

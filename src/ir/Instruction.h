@@ -19,8 +19,6 @@ public:
 
     virtual int getOpcode() { return Opcode::Nop; }
 
-    virtual string_view toString() { return Opcode::getName(getOpcode()); }
-
 };
 
 #endif //FLYLANGUAGE_INSTRUCTION_H

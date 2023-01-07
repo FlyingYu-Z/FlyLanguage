@@ -36,17 +36,6 @@ public:
         return Opcode::ConstString;
     }
 
-    string_view toString() override {
-        const char *opcodeName = Opcode::getName(getOpcode());
-        std::string formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, registerA, value.data());
-        int length = formatted.length() + 1;
-        char *tmp=new char[length];
-        sprintf(tmp, "%s", formatted.c_str());
-        tmp[length - 1] = '\0';
-        string_view result(tmp);
-        return result;
-    }
-
 };
 
 

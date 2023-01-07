@@ -17,7 +17,7 @@ Ast2IrConvertor::Ast2IrConvertor(FlyScriptParser::FileContext *fileContext) {
 
         printf("ins opcode:%d\n", ins.getOpcode());
 
-        const char *data = ins.toString().data();
+        const char *data = dump(ins).data();
         printf("ins:%s\n", data);
         delete data;
         data = NULL;

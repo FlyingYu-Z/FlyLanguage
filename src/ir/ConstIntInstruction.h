@@ -32,12 +32,6 @@ public:
         return Opcode::ConstInt;
     }
 
-    string_view toString() override {
-        char *result;
-        sprintf(result,"%s v%d,%d",Opcode::getName(getOpcode()), registerA, value);
-        return result;
-    }
-
 };
 
 

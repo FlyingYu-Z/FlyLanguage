@@ -3,17 +3,18 @@
 //
 #include "AllInstructions.h"
 
-static string_view dump(Instruction *instruction) {
-    int opcode = instruction->getOpcode();
+string_view dump(Instruction instruction) {
+    int opcode = instruction.getOpcode();
     const char *opcodeName = Opcode::getName(opcode);
     std::string formatted="";
+    printf("opcode:%d\n",opcode);
     switch (opcode) {
         case Opcode::Value::ConstInt:
-            ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(instruction);
+            ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(&instruction);
             //formatted = fmt::sprintf("%s v%d,%d", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
             break;
         case Opcode::Value::ConstString:
-            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(instruction);
+            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(&instruction);
             //formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
             break;
         default:
