@@ -8,13 +8,13 @@ static string_view dump(Instruction *instruction) {
     const char *opcodeName = Opcode::getName(opcode);
     std::string formatted="";
     switch (opcode) {
-        case Opcode::Value::ConstString:
-            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(instruction);
-            //formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
-            break;
         case Opcode::Value::ConstInt:
             ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(instruction);
             //formatted = fmt::sprintf("%s v%d,%d", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
+            break;
+        case Opcode::Value::ConstString:
+            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(instruction);
+            //formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
             break;
         default:
             throw std::runtime_error("unknown opcode value");
