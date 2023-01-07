@@ -10,12 +10,12 @@ Ast2IrConvertor::Ast2IrConvertor(FlyScriptParser::FileContext *fileContext) {
 
     auto opcode = Opcode::ConstString;
 
-    printf("opcode:%s\n", Opcode::getName(opcode));
+    printf("opcode:%s\n", getOpcodeName(opcode));
     try {
-        auto ins = ConstStringInstruction(1, "hello world");
+        auto *ins = new ConstStringInstruction(1, "hello world");
         //auto ins2 = ConstIntInstruction(1, 356);
 
-        printf("ins opcode:%d\n", ins.getOpcode());
+        printf("ins opcode:%d\n", ins->getOpcode());
 
         const char *data = dump(ins).data();
         printf("ins:%s\n", data);

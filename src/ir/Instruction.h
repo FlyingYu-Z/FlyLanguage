@@ -17,7 +17,7 @@ public:
 
     virtual ~Instruction() {}
 
-    virtual int getOpcode() { return Opcode::Nop; }
+    virtual int getOpcode(){}
 
 };
 

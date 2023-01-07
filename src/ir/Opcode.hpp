@@ -15,43 +15,31 @@ X_OPCODE(ConstInt, "const-int", 0x001) \
 X_OPCODE(ConstString, "const-string", 0x002) \
 
 
-class Opcode {
+enum Opcode {
 
-public:
-    enum : uint8_t {
 #define X_OPCODE(enumName, name, value) enumName = value,
-        OPCODE
+    OPCODE
 #undef X_OPCODE
-    };
 
-
-public:
-    Opcode() {
-    }
-
-    ~Opcode() {
-
-    }
-
-    static const char *getName(int value) {
-        switch (value) {
-#define X_OPCODE(enumName, name, value) case value: return name;
-            OPCODE
-#undef X_OPCODE
-        }
-        throw std::runtime_error("unknown opcode value");
-    }
-
-public:
-    class Value {
-    public:
-#define X_OPCODE(enumName, name, value) static const uint8_t enumName = value;
-        OPCODE
-#undef X_OPCODE
-    };
+//public:
+//    class Value {
+//    public:
+//#define X_OPCODE(enumName, name, value) static const uint8_t enumName = value;
+//        OPCODE
+//#undef X_OPCODE
+//    };
 
 
 };
+
+static const char *getOpcodeName(int value) {
+    switch (value) {
+#define X_OPCODE(enumName, name, value) case Opcode::enumName: return name;
+        OPCODE
+#undef X_OPCODE
+    }
+    throw std::runtime_error("unknown opcode value");
+}
 
 
 #endif //FLYLANGUAGE_OPCODE_HPP

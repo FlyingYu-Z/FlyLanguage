@@ -3,19 +3,19 @@
 //
 #include "AllInstructions.h"
 
-string_view dump(Instruction instruction) {
-    int opcode = instruction.getOpcode();
-    const char *opcodeName = Opcode::getName(opcode);
+string_view dump(Instruction *instruction) {
+    int opcode = instruction->getOpcode();
+    const char *opcodeName = getOpcodeName(opcode);
     std::string formatted="";
     printf("opcode:%d\n",opcode);
     switch (opcode) {
-        case Opcode::Value::ConstInt:
-            ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(&instruction);
-            //formatted = fmt::sprintf("%s v%d,%d", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
+        case ConstInt:
+            ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(instruction);
+            formatted = fmt::sprintf("%s v%d,%d", opcodeName, constIntInstruction->getRegisterA(), constIntInstruction->getValue());
             break;
-        case Opcode::Value::ConstString:
-            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(&instruction);
-            //formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
+        case ConstString:
+            ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(instruction);
+            formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
             break;
         default:
             throw std::runtime_error("unknown opcode value");
