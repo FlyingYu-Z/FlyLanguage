@@ -14,13 +14,13 @@ using namespace std;
 class StringPool {
 
 protected:
-    vector<string_view> strings = vector<string_view>();
+    vector<string> strings = vector<string>();
 
 public:
     StringPool();
 
-    void addString(string_view str);
-    int indexOf(string_view str);
+    void addString(string str);
+    int indexOf(string str);
 
     ~StringPool();
 

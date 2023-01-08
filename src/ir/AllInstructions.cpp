@@ -3,7 +3,7 @@
 //
 #include "AllInstructions.h"
 
-string_view dump(Instruction *instruction) {
+string dump(Instruction *instruction) {
     int opcode = instruction->getOpcode();
     const char *opcodeName = Opcode::getOpcodeName(opcode);
     std::string formatted="";
@@ -26,6 +26,6 @@ string_view dump(Instruction *instruction) {
     char *tmp=new char[length];
     sprintf(tmp, "%s", formatted.c_str());
     tmp[length - 1] = '\0';
-    string_view result(tmp);
+    string result(tmp);
     return result;
 }

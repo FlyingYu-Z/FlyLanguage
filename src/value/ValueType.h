@@ -15,8 +15,6 @@
 using namespace std;
 using namespace beingyi;
 
-//map<int, string_view> valueTypeMap = map<int, string_view>();
-
 //#define VALUE_TYPE \
 //X(T_void, "void", FlyScriptLexer::Type_void) \
 //X(T_string, "string", FlyScriptLexer::Type_string) \
@@ -41,7 +39,7 @@ public:
     };
 
 protected:
-    typedef std::map<std::string_view, int> NameMap;
+    typedef std::map<std::string, int> NameMap;
     static NameMap nameMap;
     static NameMap init_map() {
         NameMap tmpNameMap;
@@ -59,7 +57,7 @@ public:
         return typeList;
     }
 
-    static int getType(string_view name){
+    static int getType(string name){
         return nameMap[name];
     }
 
@@ -71,6 +69,7 @@ public:
         }
         throw std::runtime_error("unknown value");
     }
+
 
 };
 

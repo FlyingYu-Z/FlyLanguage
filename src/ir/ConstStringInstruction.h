@@ -13,10 +13,10 @@ class ConstStringInstruction : public Instruction {
 
 protected:
     int registerA;
-    string_view value;
+    string value;
 
 public:
-    ConstStringInstruction(int registerA, const string_view &value)
+    ConstStringInstruction(int registerA, const string &value)
             : Instruction(), registerA(registerA), value(value) {
 
     }
@@ -28,7 +28,7 @@ public:
         return registerA;
     }
 
-    const string_view &getValue() const {
+    const string &getValue() const {
         return value;
     }
 

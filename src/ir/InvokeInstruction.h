@@ -10,11 +10,11 @@
 class InvokeInstruction : public Instruction {
 
 protected:
-    string_view methodName;
+    string methodName;
     vector<int> registerList;
 
 public:
-    InvokeInstruction(const string_view &methodName, const vector<int> &registerList) : methodName(methodName),
+    InvokeInstruction(const string &methodName, const vector<int> &registerList) : methodName(methodName),
                                                                                         registerList(registerList) {
 
     }
@@ -23,7 +23,7 @@ public:
 
     }
 
-    const string_view &getMethodName() const {
+    const string &getMethodName() const {
         return methodName;
     }
 

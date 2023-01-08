@@ -12,11 +12,11 @@ StringPool::StringPool() {
     }
 }
 
-void StringPool::addString(string_view str) {
+void StringPool::addString(string str) {
 
 }
 
-int StringPool::indexOf(string_view str) {
+int StringPool::indexOf(string str) {
 
 }
 

@@ -22,7 +22,7 @@
 #include "GetFieldInstruction.h"
 
 
-extern string_view dump(Instruction *instruction);
+extern string dump(Instruction *instruction);
 
 
 #endif //FLYLANGUAGE_ALLINSTRUCTIONS_H

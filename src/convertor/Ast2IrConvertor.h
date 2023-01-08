@@ -11,7 +11,9 @@
 #include "TypeInMethodRemember.h"
 #include "IrMethod.h"
 #include "MethodRegister.h"
+#include "Function2IrMethodConvertor.h"
 #include "NonRegisterException.h"
+#include "CompileException.h"
 
 using namespace beingyi;
 using namespace antlr4;
@@ -28,17 +30,17 @@ public:
 
     Ast2IrConvertor(FlyScriptParser::FileContext *fileContext);
 
-    void parseBlock(FlyScriptParser::BlockContext blockContext,MethodRegister *methodRegister);
+    void parseBlock(FlyScriptParser::BlockContext *blockContext, MethodRegister *methodRegister);
 
-    void parseStat(vector<FlyScriptParser::StmtContext *> rawStmtList,MethodRegister *methodRegister);
+    void parseStmt(vector<ParseTree *> rawStmtList, MethodRegister *methodRegister);
 
-    int getExprRegister(FlyScriptParser::ExprContext *exprContext,int type,MethodRegister *methodRegister);
+    int getExprRegister(FlyScriptParser::ExprContext *exprContext, int type, MethodRegister *methodRegister);
 
     FileClass generateFileClass();
 
     ~Ast2IrConvertor();
 
-    static string_view typeContextToString(FlyScriptParser::TypeContext *typeContext);
+    static string typeContextToString(FlyScriptParser::TypeContext *typeContext);
 
 
 };

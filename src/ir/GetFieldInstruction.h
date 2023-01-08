@@ -11,10 +11,10 @@ class GetFieldInstruction : public Instruction {
 
 protected:
     int registerA;
-    string_view fieldName;
+    string fieldName;
 
 public:
-    GetFieldInstruction(int registerA, const string_view &fieldName) : Instruction(),registerA(registerA), fieldName(fieldName) {
+    GetFieldInstruction(int registerA, const string &fieldName) : Instruction(),registerA(registerA), fieldName(fieldName) {
 
     }
 
@@ -25,7 +25,7 @@ public:
         return registerA;
     }
 
-    const string_view &getFieldName() const {
+    const string &getFieldName() const {
         return fieldName;
     }
 

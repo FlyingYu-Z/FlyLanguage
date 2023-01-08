@@ -63,6 +63,9 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/src/value
         ${PROJECT_SOURCE_DIR}/src/ir
         ${PROJECT_SOURCE_DIR}/src/utils
+        ${PROJECT_SOURCE_DIR}/src/runtime
+        ${PROJECT_SOURCE_DIR}/src/runtime/value
+        ${PROJECT_SOURCE_DIR}/src/runtime/value/compare
 )
 
 file(GLOB SOURCE_FILES
@@ -78,6 +81,12 @@ file(GLOB SOURCE_FILES
         "${PROJECT_SOURCE_DIR}/src/ir/*.hpp"
         "${PROJECT_SOURCE_DIR}/src/ir/*.h"
         "${PROJECT_SOURCE_DIR}/src/utils/*.h"
+        "${PROJECT_SOURCE_DIR}/src/runtime/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/runtime/*.h"
+        "${PROJECT_SOURCE_DIR}/src/runtime/value/*.h"
+        "${PROJECT_SOURCE_DIR}/src/runtime/value/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/runtime/value/compare/*.h"
+        "${PROJECT_SOURCE_DIR}/src/runtime/value/compare/*.cpp"
         )
 
 find_package(Threads)

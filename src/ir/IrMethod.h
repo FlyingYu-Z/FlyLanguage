@@ -12,17 +12,17 @@ using namespace std;
 class MethodParameter{
 
 private:
-    string_view name;
+    string name;
     int type;
 
 public:
-    MethodParameter(string_view name,int type){
+    MethodParameter(string name,int type){
         this->name=name;
         this->type=type;
 
     }
 
-    const string_view &getName() const {
+    const string &getName() const {
         return name;
     }
 
@@ -36,20 +36,22 @@ class IrMethod{
 
 private:
     int returnType;
-    string_view name;
+    string name;
     vector<MethodParameter> params;
-    vector<Instruction> instructions;
+    vector<Instruction *> instructions;
 
 public:
-    IrMethod(int returnType, const string_view &name, const vector<MethodParameter> &params,
-             const vector<Instruction> &instructions) : returnType(returnType), name(name), params(params),
-                                                        instructions(instructions) {}
+    IrMethod(int returnType, const string &name, const vector<MethodParameter> &params,
+             const vector<Instruction *> &instructions) : returnType(returnType), name(name), params(params),
+                                                          instructions(instructions) {
+
+    }
 
     int getReturnType() const {
         return returnType;
     }
 
-    const string_view &getName() const {
+    const string &getName() const {
         return name;
     }
 
@@ -57,7 +59,7 @@ public:
         return params;
     }
 
-    const vector<Instruction> &getInstructions() const {
+    const vector<Instruction *> &getInstructions() const {
         return instructions;
     }
 
@@ -66,15 +68,15 @@ public:
 class IrField{
 
 private:
-    string_view name;
+    string name;
     int type;
 
 public:
-    IrField(const string_view &name, int type) : name(name), type(type) {
+    IrField(const string &name, int type) : name(name), type(type) {
 
     }
 
-    const string_view &getName() const {
+    const string &getName() const {
         return name;
     }
 

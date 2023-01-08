@@ -8,9 +8,10 @@
 
 MethodRegister::MethodRegister(Ast2IrConvertor *ast2IrConvertor) {
     this->typeInMethodRemember = new TypeInMethodRemember(ast2IrConvertor->typeInClassRemember);
+    this->plusSubTypeInference = new PlusSubTypeInference(this);
 }
 
-void MethodRegister::addInstruction(Instruction instruction) {
+void MethodRegister::addInstruction(Instruction *instruction) {
     if (subInstructionEnabled) {
         subInstructions.push_back(instruction);
     } else {
@@ -18,11 +19,11 @@ void MethodRegister::addInstruction(Instruction instruction) {
     }
 }
 
-vector<Instruction> MethodRegister::getInstructions() {
+vector<Instruction *> MethodRegister::getInstructions() {
     return instructions;
 }
 
-vector<Instruction> MethodRegister::getSubInstructions() {
+vector<Instruction *> MethodRegister::getSubInstructions() {
     return subInstructions;
 }
 
@@ -39,21 +40,21 @@ int MethodRegister::getSubtractedSize() {
     return subInstructions.size();
 }
 
-void MethodRegister::rememberRegister(string_view variableName, int registerA) {
+void MethodRegister::rememberRegister(string variableName, int registerA) {
     registerMap[variableName] = registerA;
 }
 
-int MethodRegister::getRegister(string_view variableName) {
+int MethodRegister::getRegister(string variableName) {
     return registerMap[variableName];
 }
 
 int MethodRegister::newRegister() {
-    return newRegister(NULL);
+    return newRegister("");
 }
 
-int MethodRegister::newRegister(string_view variableName) {
+int MethodRegister::newRegister(string variableName) {
     int registerA = usedRegister++;
-    if (variableName != NULL) {
+    if (!variableName.empty()) {
         rememberRegister(variableName, registerA);
     }
     return registerA;
@@ -63,12 +64,38 @@ int MethodRegister::currentCodeAddress() {
     return instructions.size() - 1;
 }
 
+
+int MethodRegister::getExprType(FlyScriptParser::ExprContext *exprContext) {
+    if (FlyScriptParser::IntExprContext *intExprContext = dynamic_cast<FlyScriptParser::IntExprContext *>(exprContext)) {
+        return ValueType::T_int;
+    } else if (FlyScriptParser::StringExprContext *stringExprContext = dynamic_cast<FlyScriptParser::StringExprContext *>(exprContext)) {
+        return ValueType::T_string;
+    } else if (FlyScriptParser::IdentifierExprContext *identifierExprContext = dynamic_cast<FlyScriptParser::IdentifierExprContext *>(exprContext)) {
+        string variableName = identifierExprContext->children[0]->getText();
+        int variableType = 0;
+        if (isFieldVariable(identifierExprContext)) {
+            variableType = typeInMethodRemember->typeInClassRemember->getFieldType(variableName);
+        } else {
+            variableType = typeInMethodRemember->getVariableType(variableName);
+        }
+        if (variableType == 0) {
+            throw CompileException(fmt::sprintf("cannot get the real variable type:%s", variableName));
+        }
+        return variableType;
+    } else if (FlyScriptParser::InvokeExprContext *invokeExprContext = dynamic_cast<FlyScriptParser::InvokeExprContext *>(exprContext)) {
+
+    } else if (FlyScriptParser::PlusSubExprContext *plusSubExprContext = dynamic_cast<FlyScriptParser::PlusSubExprContext *>(exprContext)) {
+        return plusSubTypeInference->getRealExprType(plusSubExprContext);
+    }
+    throw CompileException("unknown expr");
+}
+
 bool MethodRegister::isFieldVariable(FlyScriptParser::IdentifierExprContext *identifierExprContext) {
-    string_view variableName = identifierExprContext->children[0]->getText();
+    string variableName = identifierExprContext->children[0]->getText();
     return isFieldVariable(variableName);
 }
 
-bool MethodRegister::isFieldVariable(string_view variableName) {
+bool MethodRegister::isFieldVariable(string variableName) {
     int fieldType = typeInMethodRemember->typeInClassRemember->getFieldType(variableName);
     return fieldType != 0;
 }

@@ -32,7 +32,7 @@ protected:
     int symbol;
     int registerB;
 
-    typedef std::map<std::string_view, int> SymbolMap;
+    typedef std::map<std::string, int> SymbolMap;
     static SymbolMap symbolMap;
     static SymbolMap init_map() {
         SymbolMap tmpSymbolMap;
@@ -42,6 +42,9 @@ protected:
         return tmpSymbolMap;
     }
 public:
+    static int getSymbolByName(string name){
+        return symbolMap[name];
+    }
     static const char *getSymbolName(int value) {
         switch (value) {
 #define X_Symbol(enumName, name, value) case Symbol::enumName: return name;

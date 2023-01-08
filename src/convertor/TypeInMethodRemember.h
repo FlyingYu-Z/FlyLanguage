@@ -14,7 +14,7 @@ using namespace std;
 class TypeInMethodRemember {
 
 protected:
-    map<string_view, int> variableTypeMap = map<string_view, int>();
+    map<string, int> variableTypeMap = map<string, int>();
 public:
     TypeInClassRemember *typeInClassRemember;
 
@@ -26,11 +26,11 @@ public:
 
     }
 
-    void putVariableType(string_view variableName, int valueType) {
+    void putVariableType(string variableName, int valueType) {
         variableTypeMap[variableName] = valueType;
     }
 
-    int getVariableType(string_view variableName) {
+    int getVariableType(string variableName) {
         return variableTypeMap[variableName];
     }
 
