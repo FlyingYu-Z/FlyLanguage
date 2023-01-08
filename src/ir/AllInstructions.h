@@ -7,6 +7,19 @@
 
 #include "ConstStringInstruction.h"
 #include "ConstIntInstruction.h"
+#include "ConstFloatInstruction.h"
+#include "ConstParamInstruction.h"
+#include "MoveResultObjectInstruction.h"
+#include "MoveInstruction.h"
+#include "InvokeInstruction.h"
+#include "PlusInstruction.h"
+#include "SubInstruction.h"
+#include "BoolInstruction.h"
+#include "IfInstruction.h"
+#include "IfNotInstruction.h"
+#include "GotoInstruction.h"
+#include "SetFieldInstruction.h"
+#include "GetFieldInstruction.h"
 
 
 extern string_view dump(Instruction *instruction);

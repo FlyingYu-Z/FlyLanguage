@@ -5,6 +5,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 #set(ENV{http_proxy} "http://127.0.0.1:10809")
 #set(ENV{https_proxy} "https://127.0.0.1:10809")
+#set(ENV{http_proxy} "socks5://127.0.0.1:10809")
+#set(ENV{https_proxy} "socks5://127.0.0.1:10809")
 
 enable_testing()
 project(FlyLanguage)
@@ -12,7 +14,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(FetchContent)
 FetchContent_Declare(fmt
-        URL https://github.com/fmtlib/fmt/archive/refs/tags/8.0.1.tar.gz)
+        URL https://github.com/fmtlib/fmt/archive/refs/tags/9.1.0.tar.gz)
 FetchContent_MakeAvailable(fmt)
 
 # required if linking to static library
@@ -22,17 +24,14 @@ add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -save-temps -fpermissive")
-
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps -fpermissive")
-
-#set(CMAKE_CXX_FLAGS " -std=c++0x")
 
 # Specify the version of the antlr4 library needed for this project.
 # By default the latest version of antlr4 will be used.  You can specify a
 # specific, stable version by setting a repository tag value or a link
 # to a zip file containing the libary source.
-#set(ANTLR4_TAG 4.11.1)
-#set(ANTLR4_ZIP_REPOSITORY https://github.com/antlr/antlr4/archive/refs/tags/4.11.1.zip)
+set(ANTLR4_TAG 4.11.1)
+set(ANTLR4_ZIP_REPOSITORY https://github.com/antlr/antlr4/archive/refs/tags/4.11.1.zip)
 
 # add external build for antlrcpp
 include(ExternalAntlr4Cpp)
@@ -45,16 +44,16 @@ find_package(ANTLR REQUIRED)
 #find_package(antlr4-generator REQUIRED)
 
 # Call macro to add lexer and grammar to your build dependencies.
-#antlr_target(HexScriptLexer HexScriptLexer.g4 LEXER
-#        PACKAGE beingyi)
-#antlr_target(HexScriptParser FlyScriptParser.g4 PARSER
-#        PACKAGE beingyi
-#        DEPENDS_ANTLR HexScriptLexer
-#        COMPILE_FLAGS -lib ${ANTLR_HexScriptLexer_OUTPUT_DIR})
+antlr_target(FlyScriptLexer FlyScriptLexer.g4 LEXER
+        PACKAGE beingyi)
+antlr_target(FlyScriptParser FlyScriptParser.g4 PARSER
+        PACKAGE beingyi
+        DEPENDS_ANTLR FlyScriptLexer
+        COMPILE_FLAGS -lib ${ANTLR_FlyScriptLexer_OUTPUT_DIR})
 
 # include generated files in project environment
-include_directories(${ANTLR_HexScriptLexer_OUTPUT_DIR})
-include_directories(${ANTLR_HexScriptParser_OUTPUT_DIR})
+include_directories(${ANTLR_FlyScriptLexer_OUTPUT_DIR})
+include_directories(${ANTLR_FlyScriptParser_OUTPUT_DIR})
 
 
 include_directories(

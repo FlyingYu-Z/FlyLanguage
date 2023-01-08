@@ -63,6 +63,16 @@ int MethodRegister::currentCodeAddress() {
     return instructions.size() - 1;
 }
 
+bool MethodRegister::isFieldVariable(FlyScriptParser::IdentifierExprContext *identifierExprContext) {
+    string_view variableName = identifierExprContext->children[0]->getText();
+    return isFieldVariable(variableName);
+}
+
+bool MethodRegister::isFieldVariable(string_view variableName) {
+    int fieldType = typeInMethodRemember->typeInClassRemember->getFieldType(variableName);
+    return fieldType != 0;
+}
+
 MethodRegister::~MethodRegister() {
 
 }

@@ -100,8 +100,16 @@ public:
 
     }
 
+    void addField(IrField field){
+        fields.push_back(field);
+    }
+
     const vector<IrField> &getFields() const {
         return fields;
+    }
+
+    void addMethod(IrMethod method){
+        methods.push_back(method);
     }
 
     const vector<IrMethod> &getMethods() const {

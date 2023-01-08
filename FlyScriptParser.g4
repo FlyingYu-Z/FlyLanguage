@@ -7,7 +7,7 @@ options {
     tokenVocab = 'FlyScriptLexer';
 }
 
-file:   (function | field | stat)+ ;
+file:   (function | field | stmt)+ ;
 
 //varDecl
 //    :   Type ID ('=' expr)? ';' #varStmt
@@ -30,8 +30,8 @@ functionParameter
     :   type ID
     ;
 
-block:  '{' stat* '}' ;   // possibly empty statement block
-stat
+block:  '{' stmt* '}' ;   // possibly empty statement block
+stmt
     :
     block #codeBlock
     |   type ID ('=' expr)? ';' #varStmt

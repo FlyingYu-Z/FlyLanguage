@@ -5,17 +5,18 @@
 
 string_view dump(Instruction *instruction) {
     int opcode = instruction->getOpcode();
-    const char *opcodeName = getOpcodeName(opcode);
+    const char *opcodeName = Opcode::getOpcodeName(opcode);
     std::string formatted="";
-    printf("opcode:%d\n",opcode);
     switch (opcode) {
-        case ConstInt:
+        case Opcode::ConstInt:{
             ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction*>(instruction);
             formatted = fmt::sprintf("%s v%d,%d", opcodeName, constIntInstruction->getRegisterA(), constIntInstruction->getValue());
+            }
             break;
-        case ConstString:
+        case Opcode::ConstString:{
             ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction*>(instruction);
             formatted = fmt::sprintf("%s v%d,\"%s\"", opcodeName, constStringInstruction->getRegisterA(), constStringInstruction->getValue().data());
+            }
             break;
         default:
             throw std::runtime_error("unknown opcode value");

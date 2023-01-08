@@ -7,7 +7,7 @@
 
 #include <fmt/printf.h>
 #include "StringPool.h"
-#include "Opcode.hpp"
+#include "Opcode.h"
 
 class Instruction {
 

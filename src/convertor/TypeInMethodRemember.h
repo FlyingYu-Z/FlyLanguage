@@ -15,8 +15,8 @@ class TypeInMethodRemember {
 
 protected:
     map<string_view, int> variableTypeMap = map<string_view, int>();
-    TypeInClassRemember *typeInClassRemember;
 public:
+    TypeInClassRemember *typeInClassRemember;
 
     TypeInMethodRemember(TypeInClassRemember *typeInClassRemember) {
         this->typeInClassRemember = typeInClassRemember;

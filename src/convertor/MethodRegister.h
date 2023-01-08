@@ -23,17 +23,33 @@ protected:
 
 public:
     MethodRegister(Ast2IrConvertor *ast2IrConvertor);
+
     void addInstruction(Instruction instruction);
+
     vector<Instruction> getInstructions();
+
     vector<Instruction> getSubInstructions();
+
     void enableSubInstruction();
+
     void disableSubInstruction();
+
     int getSubtractedSize();
-    void rememberRegister(string_view variableName,int registerA);
+
+    void rememberRegister(string_view variableName, int registerA);
+
     int getRegister(string_view variableName);
+
     int newRegister();
+
     int newRegister(string_view variableName);
+
     int currentCodeAddress();
+
+    bool isFieldVariable(FlyScriptParser::IdentifierExprContext *identifierExprContext);
+
+    bool isFieldVariable(string_view variableName);
+
     ~MethodRegister();
 
 };
