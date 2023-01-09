@@ -1,0 +1,47 @@
+void main(){
+0    invoke testIf()
+}
+
+
+void testIf(){
+0    const-int v1,1
+1    const-int v2,9999
+2    bool v1 < v2
+3    move-result-object v3
+4    if v3,5
+5    goto 10
+6    const-string v4,"i->"
+7    plus v4,v1
+8    move-result-object v5
+9    invoke println(v5)
+10    return void
+}
+
+
+void testIfInWhile(){
+0    const-int v1,1
+1    const-int v2,0
+2    bool v1 > v2
+3    move-result-object v3
+4    if v3,6
+5    goto 22
+6    const-int v4,9999
+7    bool v1 > v4
+8    move-result-object v5
+9    if v5,5
+10    goto 8
+11    const-string v6,"before break"
+12    invoke println(v6)
+13    const-string v7,"i->"
+14    plus v7,v1
+15    move-result-object v8
+16    invoke println(v8)
+17    const-int v9,1
+18    plus v1,v9
+19    move-result-object v10
+20    move v1,v10
+21    goto 5
+22    return void
+}
+
+
