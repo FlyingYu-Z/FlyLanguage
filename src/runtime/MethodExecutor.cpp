@@ -14,23 +14,28 @@ MethodExecutor::MethodExecutor(ClassRuntime *classRuntime, IrMethod *irMethod) :
     this->instructions = irMethod->getInstructions();
 }
 
-void MethodExecutor::setParamValues(vector<any> values) {
-    for (any v: values) {
+void MethodExecutor::setParamValues(vector<Value> values) {
+    for (Value v: values) {
         this->paramValues.push_back(v);
     }
 }
 
-any MethodExecutor::getRegisterValue(int registerA) {
-    return registerValueMap[registerA];
+Value MethodExecutor::getRegisterValue(int registerA) {
+    return registerValueMap.at(registerA);
 }
 
-void MethodExecutor::setRegisterValue(int registerA, any value) {
-    registerValueMap[registerA] = value;
+void MethodExecutor::setRegisterValue(int registerA, Value value) {
+    auto iter = registerValueMap.find(registerA);
+    if (iter != registerValueMap.end()) {
+        registerValueMap.erase(iter);//delete if exists
+    }
+    registerValueMap.insert(map<int, Value>::value_type(registerA, value));
 }
 
 void MethodExecutor::moveObjectResult(int registerA) {
-    setRegisterValue(registerA, currentResult);
-    currentResult = nullptr;
+    setRegisterValue(registerA, Value(currentResultValue->getType(),currentResultValue->getValue()));
+    delete currentResultValue;
+    currentResultValue = nullptr;
 }
 
 void MethodExecutor::gotoAddress(int address) {
@@ -48,10 +53,15 @@ Instruction *MethodExecutor::nextInstruction() {
     return instructions[execCodeAddress++];
 }
 
-void MethodExecutor::returnVoid() {
-    finished = true;
-    returnResult = nullptr;
+void MethodExecutor::setCurrentResult(Value value) {
+    currentResultValue = new Value(value.getType(),value.getValue());
 }
+
+void MethodExecutor::returnResult(Value value) {
+    finished = true;
+    returnResultValue = new Value(value.getType(),value.getValue());
+}
+
 
 void MethodExecutor::execute() {
     while (!finished) {
@@ -67,22 +77,26 @@ void MethodExecutor::execute() {
             }
             case Opcode::ConstInt: {
                 ConstIntInstruction *constIntInstruction = dynamic_cast<ConstIntInstruction *>(instruction);
-                registerValueMap[constIntInstruction->getRegisterA()] = constIntInstruction->getValue();
+                setRegisterValue(constIntInstruction->getRegisterA(),
+                                 Value(ValueType::T_int, constIntInstruction->getValue()));
                 break;
             }
             case Opcode::ConstString: {
                 ConstStringInstruction *constStringInstruction = dynamic_cast<ConstStringInstruction *>(instruction);
-                registerValueMap[constStringInstruction->getRegisterA()] = constStringInstruction->getValue();
+                setRegisterValue(constStringInstruction->getRegisterA(),
+                                 Value(ValueType::T_string, constStringInstruction->getValue()));
                 break;
             }
             case Opcode::ConstFloat: {
                 ConstFloatInstruction *constFloatInstruction = dynamic_cast<ConstFloatInstruction *>(instruction);
-                registerValueMap[constFloatInstruction->getRegisterA()] = constFloatInstruction->getValue();
+                setRegisterValue(constFloatInstruction->getRegisterA(),
+                                 Value(ValueType::T_float, constFloatInstruction->getValue()));
                 break;
             }
             case Opcode::ConstParam: {
                 ConstParamInstruction *constParamInstruction = dynamic_cast<ConstParamInstruction *>(instruction);
-                registerValueMap[constParamInstruction->getRegisterA()] = paramValues[constParamInstruction->getParamIndex()];
+                Value paramValue=paramValues[constParamInstruction->getParamIndex()];
+                setRegisterValue(constParamInstruction->getRegisterA(),Value(paramValue.getType(), paramValue.getValue()));
                 break;
             }
             case Opcode::MoveResultObject: {
@@ -98,15 +112,54 @@ void MethodExecutor::execute() {
             case Opcode::Invoke: {
                 InvokeInstruction *invokeInstruction = dynamic_cast<InvokeInstruction *>(instruction);
                 string methodName = invokeInstruction->getMethodName();
-                vector<any> argList = vector<any>();
                 vector<int> regList = invokeInstruction->getRegisterList();
-                for (int i = 0; i < regList.size(); i++) {
-                    argList.push_back(getRegisterValue(regList[i]));
+                if(SystemMethod::isSystemMethod(methodName)){
+                    vector<any> argList = vector<any>();
+                    for (int i = 0; i < regList.size(); i++) {
+                        argList.push_back(getRegisterValue(regList[i]).getValue());
+                    }
+                    SystemMethod::invokeMethod(methodName, argList);
+                }else{
+                    vector<Value> argList = vector<Value>();
+                    for (int i = 0; i < regList.size(); i++) {
+                        argList.push_back(getRegisterValue(regList[i]));
+                    }
+                    MethodExecutor methodExecutor=classRuntime->getMethodExecutor(methodName);
+                    methodExecutor.setParamValues(argList);
+                    methodExecutor.execute();
                 }
                 break;
             }
             case Opcode::Plus: {
                 PlusInstruction *plusInstruction = dynamic_cast<PlusInstruction *>(instruction);
+                Value valueA = getRegisterValue(plusInstruction->getRegisterA());
+                Value valueB = getRegisterValue(plusInstruction->getRegisterB());
+                int type1 = valueA.getType();
+                int type2 = valueB.getType();
+                int highestType = ValueCalc::getHighestTypeForPlusInstruction(type1, type2);
+                switch (highestType) {
+                    case ValueType::T_int: {
+                        int castValue1 = any_cast<int>(valueA.getValue());
+                        int castValue2 = any_cast<int>(valueB.getValue());
+                        int plusValue = castValue1 + castValue2;
+                        setCurrentResult(Value(ValueType::T_int, plusValue));
+                        break;
+                    }
+                    case ValueType::T_float: {
+                        float castValue1 = any_cast<float>(valueA.getValue());
+                        float castValue2 = any_cast<float>(valueB.getValue());
+                        float plusValue = castValue1 + castValue2;
+                        setCurrentResult(Value(ValueType::T_float, plusValue));
+                        break;
+                    }
+                    case ValueType::T_string: {
+                        string castValue1 = ValueCalc::valueToString(type1,valueA.getValue());
+                        string castValue2 = ValueCalc::valueToString(type2,valueB.getValue());
+                        string plusValue = castValue1 + castValue2;
+                        setCurrentResult(Value(ValueType::T_string, plusValue));
+                        break;
+                    }
+                }
                 break;
             }
             case Opcode::Sub: {
@@ -115,18 +168,18 @@ void MethodExecutor::execute() {
             }
             case Opcode::Bool: {
                 BoolInstruction *boolInstruction = dynamic_cast<BoolInstruction *>(instruction);
-                any valueA = getRegisterValue(boolInstruction->getRegisterA());
-                int symbol=boolInstruction->getSymbol();
-                any valueB = getRegisterValue(boolInstruction->getRegisterB());
-
-                int type1 = ValueCalc::ctype2vtype(valueA.type());
-                int type2 = ValueCalc::ctype2vtype(valueB.type());
-
-                int highestType = ValueCalc::getHighestType(type1, type2);
+                Value valueA = getRegisterValue(boolInstruction->getRegisterA());
+                int symbol = boolInstruction->getSymbol();
+                Value valueB = getRegisterValue(boolInstruction->getRegisterB());
+                int type1 = valueA.getType();
+                int type2 = valueB.getType();
+                int highestType = ValueCalc::getHighestTypeForBoolInstruction(type1, type2);
                 switch (highestType) {
-                    case ValueType::T_int:{
-                        IntValueCompare intValueCompare=IntValueCompare(any_cast<int>(valueA),symbol, any_cast<int>(valueB));
-                        currentResult=intValueCompare.compare();
+                    case ValueType::T_int: {
+                        int castValue1 = any_cast<int>(valueA.getValue());
+                        int castValue2 = any_cast<int>(valueB.getValue());
+                        IntValueCompare intValueCompare = IntValueCompare(castValue1, symbol, castValue2);
+                        setCurrentResult(Value(ValueType::T_boolean, intValueCompare.compare()));
                         break;
                     }
                 }
@@ -134,6 +187,11 @@ void MethodExecutor::execute() {
             }
             case Opcode::If: {
                 IfInstruction *ifInstruction = dynamic_cast<IfInstruction *>(instruction);
+                Value value= getRegisterValue(ifInstruction->getRegisterA());
+                bool castValue= any_cast<bool>(value.getValue());
+                if(castValue){
+                    gotoAddress(ifInstruction->getAddress());
+                }
                 break;
             }
             case Opcode::IfNot: {
@@ -161,7 +219,6 @@ void MethodExecutor::execute() {
                 throw RuntimeException("unsupported instruction opcode:" + opcode);
         }
     }
-    printf("finished");
 }
 
 MethodExecutor::~MethodExecutor() {

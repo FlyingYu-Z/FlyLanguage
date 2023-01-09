@@ -11,7 +11,7 @@ using namespace std;
 
 class ClassRuntime {
 private:
-    map<string, any> fieldValueMap = map<string, any>();
+    map<string, Value> fieldValueMap = map<string, Value>();
 
 protected:
     FileClass fileClass;
@@ -19,9 +19,11 @@ protected:
 public:
     ClassRuntime(const FileClass &fileClass);
 
-    any getFieldValue(string fieldName);
+    Value getFieldValue(string fieldName);
 
-    void setFieldValue(string fieldName, any value);
+    void setFieldValue(string fieldName, Value value);
+
+    MethodExecutor getMethodExecutor(string methodName);
 
     void execute();
 

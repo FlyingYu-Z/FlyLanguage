@@ -66,6 +66,7 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/src/runtime
         ${PROJECT_SOURCE_DIR}/src/runtime/value
         ${PROJECT_SOURCE_DIR}/src/runtime/value/compare
+        ${PROJECT_SOURCE_DIR}/src/exception
 )
 
 file(GLOB SOURCE_FILES
@@ -87,6 +88,7 @@ file(GLOB SOURCE_FILES
         "${PROJECT_SOURCE_DIR}/src/runtime/value/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/runtime/value/compare/*.h"
         "${PROJECT_SOURCE_DIR}/src/runtime/value/compare/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/exception/*.h"
         )
 
 find_package(Threads)

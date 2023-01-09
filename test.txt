@@ -1,19 +1,20 @@
 int a=130;
 print("hello");
+println(" world");
 if(a>10){
 println("大于10");
 }else{
 println("小于");
 }
 a=128;
-print(a);
+println(a);
 
 test(133456);
 
 void test(int i){
 int key=101;
-println("test->"+i);
-
+println("i->"+i);
+println("key->"+key);
 if(a>11){
 println("test->"+"大于11");
 }else{
@@ -22,4 +23,4 @@ println("test->"+"小于");
 
 }
 int cc=a+10;
-print("cc->"+cc);
+println("cc->"+cc);

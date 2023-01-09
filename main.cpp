@@ -25,33 +25,31 @@ ClassRuntime createFromFile(string path) {
 }
 
 
-int main(int , const char **) {
+int main(int argc, const char **argv) {
+    const char *scriptPath=argv[1];
 
-    auto opcode = Opcode::ConstString;
-
-    printf("opcode:%s\n", Opcode::getOpcodeName(opcode));
-    try {
-        auto *ins = new ConstStringInstruction(1, "hello world");
+//    try {
+        auto *ins = new ConstFloatInstruction(1, 1.556f);
         //auto ins2 = ConstIntInstruction(1, 356);
 
-        printf("ins opcode:%d\n", ins->getOpcode());
+//        printf("ins opcode:%d\n", ins->getOpcode());
 
         string dumpString = dump(ins);
         const char *data = dumpString.c_str();
         printf("ins:%s\n", data);
-        printf("ins:%s\n", dumpString.c_str());
-        printf("ins:%s\n", dump(ins).c_str());
+//        printf("ins:%s\n", dumpString.c_str());
+//        printf("ins:%s\n", dump(ins).c_str());
 
 
-        char *content=read_txt_content("/media/flying/Data/AllProjects/CLionProjects/FlyLanguage/test.txt");
+        char *content=read_txt_content(scriptPath);
 
         ClassRuntime classRuntime= createFromContent(content);
         classRuntime.execute();
 
-    } catch (std::exception &e) {
-        std::cout << "MyException caught" << std::endl;
-        std::cout << e.what() << std::endl;
-    }
+//    } catch (std::exception &e) {
+//        std::cout << "MyException caught" << std::endl;
+//        std::cout << e.what() << std::endl;
+//    }
 
     return 0;
 }

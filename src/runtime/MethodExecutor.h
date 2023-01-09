@@ -9,7 +9,9 @@
 #include "IrMethod.h"
 #include "NonRegisterException.h"
 #include "RuntimeException.h"
+#include "Value.h"
 #include <any>
+#include <map>
 
 class ClassRuntime;
 
@@ -23,19 +25,19 @@ protected:
     vector<Instruction *> instructions;
     int execCodeAddress = 0;
     bool finished = false;
-    map<int, any> registerValueMap = map<int, any>();
-    vector<any> paramValues=vector<any>();
-    any currentResult = nullptr;
-    any returnResult = nullptr;
+    map<int, Value> registerValueMap = map<int, Value>();
+    vector<Value> paramValues = vector<Value>();
+    Value *currentResultValue = nullptr;
+    Value *returnResultValue = nullptr;
 
 public:
     MethodExecutor(ClassRuntime *classRuntime, IrMethod *irMethod);
 
-    void setParamValues(vector<any> values);
+    void setParamValues(vector<Value> values);
 
-    any getRegisterValue(int registerA);
+    Value getRegisterValue(int registerA);
 
-    void setRegisterValue(int registerA, any value);
+    void setRegisterValue(int registerA, Value value);
 
     void moveObjectResult(int registerA);
 
@@ -45,7 +47,8 @@ public:
 
     Instruction *nextInstruction();
 
-    void returnVoid();
+    void setCurrentResult(Value value);
+    void returnResult(Value value);
 
     void execute();
 
