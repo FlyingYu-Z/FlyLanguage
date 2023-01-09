@@ -14,7 +14,12 @@ Type_boolean: 'boolean';
 K_If: 'if';
 K_Then: 'then';
 K_Else: 'else';
+K_While: 'while';
+K_Break: 'break';
 K_Return: 'return';
+
+Kv_True: 'true';
+Kv_False: 'false';
 
 LCurlyPar: '{';
 RCurlyPar: '}';

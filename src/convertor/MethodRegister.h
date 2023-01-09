@@ -20,16 +20,24 @@ protected:
     //variableName,register
     map<string, int> registerMap = map<string, int>();
     vector<Instruction *> instructions = vector<Instruction *>();
-    vector<Instruction *> subInstructions = vector<Instruction *>();
-    bool subInstructionEnabled = false;
-
+    map<int, bool> subInstructionSwitchMap = map<int, bool>();
+    map<int, vector<Instruction *> *> subInstructionsMap = map<int, vector<Instruction *> *>();
+    int subKey = 0;
 public:
+    typedef vector<Instruction *> InstructionList;
     TypeInMethodRemember *typeInMethodRemember;
     PlusSubTypeInference *plusSubTypeInference;
 
+
     MethodRegister(Ast2IrConvertor *ast2IrConvertor);
 
+private:
+    bool isSubInstructionEnabled();
+
+public:
     void addInstruction(Instruction *instruction);
+
+    void addInstruction(int index,Instruction *instruction);
 
     vector<Instruction *> getInstructions();
 
@@ -40,6 +48,8 @@ public:
     void disableSubInstruction();
 
     int getSubtractedSize();
+
+    void clearSubInstructions();
 
     void rememberRegister(string variableName, int registerA);
 

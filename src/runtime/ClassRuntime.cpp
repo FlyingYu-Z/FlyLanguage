@@ -5,7 +5,7 @@
 #include "ClassRuntime.h"
 #include "file.h"
 
-ClassRuntime::ClassRuntime(const FileClass &fileClass) : fileClass(fileClass) {
+ClassRuntime::ClassRuntime(FileClass *fileClass) : fileClass(fileClass) {
 
 }
 
@@ -18,15 +18,15 @@ void ClassRuntime::setFieldValue(string fieldName, Value value) {
     if (iter != fieldValueMap.end()) {
         fieldValueMap.erase(iter);//delete if exists
     }
-    fieldValueMap.insert(map<string_view, Value>::value_type(fieldName, value));
+    fieldValueMap.insert(map<string, Value>::value_type(fieldName, value));
 }
 
 MethodExecutor ClassRuntime::getMethodExecutor(string methodName) {
     //IrMethod *mainMethod=NULL;
-    for (IrMethod irMethod: fileClass.getMethods()) {
-        if (strcmp(irMethod.getName().data(), methodName.data()) == 0) {
+    for (IrMethod *irMethod: fileClass->getMethods()) {
+        if (strcmp(irMethod->getName().data(), methodName.data()) == 0) {
             //mainMethod=&irMethod;
-            MethodExecutor methodExecutor = MethodExecutor(this, &irMethod);
+            MethodExecutor methodExecutor = MethodExecutor(this, irMethod);
             return methodExecutor;
         }
     }
@@ -39,8 +39,6 @@ void ClassRuntime::execute() {
 }
 
 ClassRuntime::~ClassRuntime() {
-
+    delete fileClass;
 }
-
-
 

@@ -15,7 +15,9 @@ ClassRuntime createFromContent(string content) {
     FlyScriptParser parser(&tokens);
     FlyScriptParser::FileContext *tree = parser.file();
     Ast2IrConvertor ast2IrConvertor = Ast2IrConvertor(tree);
-    auto fileClass = ast2IrConvertor.generateFileClass();
+    auto *fileClass = ast2IrConvertor.generateFileClass();
+    string fileClassDump=fileClass->dump();
+    write_file("/media/flying/Data/AllProjects/CLionProjects/FlyLanguage/test_ins.txt",fileClassDump.data(),fileClassDump.size());
     return ClassRuntime(fileClass);
 }
 
@@ -34,7 +36,7 @@ int main(int argc, const char **argv) {
 
 //        printf("ins opcode:%d\n", ins->getOpcode());
 
-        string dumpString = dump(ins);
+        string dumpString = dumpInstruction(ins);
         const char *data = dumpString.c_str();
         printf("ins:%s\n", data);
 //        printf("ins:%s\n", dumpString.c_str());

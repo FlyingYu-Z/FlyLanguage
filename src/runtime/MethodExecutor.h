@@ -48,7 +48,11 @@ public:
     Instruction *nextInstruction();
 
     void setCurrentResult(Value value);
+
     void returnResult(Value value);
+    void returnVoid();
+
+    Value *getReturnedResult();
 
     void execute();
 

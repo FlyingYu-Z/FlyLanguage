@@ -2,13 +2,13 @@
 // Created by flying on 2023/1/8.
 //
 
-#ifndef FLYLANGUAGE_VALUECOMPARE_H
-#define FLYLANGUAGE_VALUECOMPARE_H
+#ifndef FLYLANGUAGE_VALUECOMPARATOR_H
+#define FLYLANGUAGE_VALUECOMPARATOR_H
 
 #include "BoolInstruction.h"
 
 template< typename T>
-class ValueCompare {
+class ValueComparator {
 
 protected:
     T value1;
@@ -16,7 +16,7 @@ protected:
     T value2;
 
 public:
-    ValueCompare(T value1, int symbol, T value2) : value1(value1), symbol(symbol), value2(value2) {
+    ValueComparator(T value1, int symbol, T value2) : value1(value1), symbol(symbol), value2(value2) {
 
     }
 
@@ -34,8 +34,8 @@ public:
             case BoolInstruction::Greater: {
                 return compareGreater();
             }
-            case BoolInstruction::LesserrOrEqual: {
-                return compareLesserrOrEqual();
+            case BoolInstruction::LesserOrEqual: {
+                return compareLesserOrEqual();
             }
             case BoolInstruction::Lesser: {
                 return compareLesser();
@@ -49,13 +49,13 @@ public:
     virtual bool compareNotEqual(){}
     virtual bool compareGreaterOrEqual(){}
     virtual bool compareGreater(){}
-    virtual bool compareLesserrOrEqual(){}
+    virtual bool compareLesserOrEqual(){}
     virtual bool compareLesser(){}
 
-    virtual ~ValueCompare() {
+    virtual ~ValueComparator() {
 
     }
 
 };
 
-#endif //FLYLANGUAGE_VALUECOMPARE_H
+#endif //FLYLANGUAGE_VALUECOMPARATOR_H

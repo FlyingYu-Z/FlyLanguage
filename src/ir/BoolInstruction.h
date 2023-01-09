@@ -13,7 +13,7 @@ X_Symbol(JudgeEqual, "==", 0x000) \
 X_Symbol(NotEqual, "!=", 0x001) \
 X_Symbol(GreaterOrEqual, ">=", 0x002) \
 X_Symbol(Greater, ">", 0x003) \
-X_Symbol(LesserrOrEqual, "<=", 0x004) \
+X_Symbol(LesserOrEqual, "<=", 0x004) \
 X_Symbol(Lesser, "<", 0x005) \
 
 

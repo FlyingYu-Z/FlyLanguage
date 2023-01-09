@@ -36,7 +36,7 @@ public:
 
     int getExprRegister(FlyScriptParser::ExprContext *exprContext, int type, MethodRegister *methodRegister);
 
-    FileClass generateFileClass();
+    FileClass *generateFileClass();
 
     ~Ast2IrConvertor();
 

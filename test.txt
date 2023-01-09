@@ -11,6 +11,33 @@ println(a);
 
 test(133456);
 
+int testNoParam=testNoParam();
+int testTowParam=testTowParam(10,20);
+
+println("testNoParam->"+testNoParam);
+println("testTowParam->"+testTowParam);
+
+testReturn();
+
+testWhile();
+
+void testReturn(){
+println("before return");
+return;
+println("after return");
+}
+
+void testWhile(){
+int i=1;
+while(i>0){
+if(i>9999){
+break;
+}
+println("i->"+i);
+i=i+1;
+}
+}
+
 void test(int i){
 int key=101;
 println("i->"+i);
@@ -20,7 +47,16 @@ println("test->"+"大于11");
 }else{
 println("test->"+"小于");
 }
-
 }
+
+
+int testNoParam(){
+return 123456;
+}
+
+int testTowParam(int x,int y){
+return x+y;
+}
+
 int cc=a+10;
 println("cc->"+cc);

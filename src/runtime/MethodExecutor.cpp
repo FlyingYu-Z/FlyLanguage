@@ -7,7 +7,7 @@
 #include "SystemMethod.h"
 #include "BoolValueCalc.h"
 #include "bits.h"
-#include "IntValueCompare.h"
+#include "AllValueComprator.h"
 
 MethodExecutor::MethodExecutor(ClassRuntime *classRuntime, IrMethod *irMethod) : classRuntime(classRuntime),
                                                                                  irMethod(irMethod) {
@@ -33,7 +33,10 @@ void MethodExecutor::setRegisterValue(int registerA, Value value) {
 }
 
 void MethodExecutor::moveObjectResult(int registerA) {
-    setRegisterValue(registerA, Value(currentResultValue->getType(),currentResultValue->getValue()));
+    if(!currentResultValue){
+        throw RuntimeException("cannot exec moveObjectResult,because the value is null");
+    }
+    setRegisterValue(registerA, Value(currentResultValue->getType(), currentResultValue->getValue()));
     delete currentResultValue;
     currentResultValue = nullptr;
 }
@@ -54,14 +57,24 @@ Instruction *MethodExecutor::nextInstruction() {
 }
 
 void MethodExecutor::setCurrentResult(Value value) {
-    currentResultValue = new Value(value.getType(),value.getValue());
+    currentResultValue = new Value(value.getType(), value.getValue());
 }
 
 void MethodExecutor::returnResult(Value value) {
     finished = true;
-    returnResultValue = new Value(value.getType(),value.getValue());
+    returnResultValue = new Value(value.getType(), value.getValue());
 }
 
+void MethodExecutor::returnVoid() {
+    finished = true;
+    delete currentResultValue;
+    returnResultValue = nullptr;
+}
+
+Value *MethodExecutor::getReturnedResult() {
+    return returnResultValue;
+    //return Value(returnResultValue->getType(), returnResultValue->getValue());
+}
 
 void MethodExecutor::execute() {
     while (!finished) {
@@ -93,10 +106,17 @@ void MethodExecutor::execute() {
                                  Value(ValueType::T_float, constFloatInstruction->getValue()));
                 break;
             }
+            case Opcode::ConstBoolean: {
+                ConstBooleanInstruction *constBooleanInstruction = dynamic_cast<ConstBooleanInstruction *>(instruction);
+                setRegisterValue(constBooleanInstruction->getRegisterA(),
+                                 Value(ValueType::T_boolean, constBooleanInstruction->isValue()));
+                break;
+            }
             case Opcode::ConstParam: {
                 ConstParamInstruction *constParamInstruction = dynamic_cast<ConstParamInstruction *>(instruction);
-                Value paramValue=paramValues[constParamInstruction->getParamIndex()];
-                setRegisterValue(constParamInstruction->getRegisterA(),Value(paramValue.getType(), paramValue.getValue()));
+                Value paramValue = paramValues[constParamInstruction->getParamIndex()];
+                setRegisterValue(constParamInstruction->getRegisterA(),
+                                 Value(paramValue.getType(), paramValue.getValue()));
                 break;
             }
             case Opcode::MoveResultObject: {
@@ -113,20 +133,25 @@ void MethodExecutor::execute() {
                 InvokeInstruction *invokeInstruction = dynamic_cast<InvokeInstruction *>(instruction);
                 string methodName = invokeInstruction->getMethodName();
                 vector<int> regList = invokeInstruction->getRegisterList();
-                if(SystemMethod::isSystemMethod(methodName)){
+                if (SystemMethod::isSystemMethod(methodName)) {
                     vector<any> argList = vector<any>();
                     for (int i = 0; i < regList.size(); i++) {
                         argList.push_back(getRegisterValue(regList[i]).getValue());
                     }
                     SystemMethod::invokeMethod(methodName, argList);
-                }else{
+                } else {
                     vector<Value> argList = vector<Value>();
                     for (int i = 0; i < regList.size(); i++) {
                         argList.push_back(getRegisterValue(regList[i]));
                     }
-                    MethodExecutor methodExecutor=classRuntime->getMethodExecutor(methodName);
+                    MethodExecutor methodExecutor = classRuntime->getMethodExecutor(methodName);
                     methodExecutor.setParamValues(argList);
                     methodExecutor.execute();
+                    Value *returnedResult = methodExecutor.getReturnedResult();
+                    if (returnedResult) {
+                        setCurrentResult(*returnedResult);
+                        delete returnedResult;
+                    }
                 }
                 break;
             }
@@ -153,8 +178,8 @@ void MethodExecutor::execute() {
                         break;
                     }
                     case ValueType::T_string: {
-                        string castValue1 = ValueCalc::valueToString(type1,valueA.getValue());
-                        string castValue2 = ValueCalc::valueToString(type2,valueB.getValue());
+                        string castValue1 = ValueCalc::valueToString(type1, valueA.getValue());
+                        string castValue2 = ValueCalc::valueToString(type2, valueB.getValue());
                         string plusValue = castValue1 + castValue2;
                         setCurrentResult(Value(ValueType::T_string, plusValue));
                         break;
@@ -178,8 +203,15 @@ void MethodExecutor::execute() {
                     case ValueType::T_int: {
                         int castValue1 = any_cast<int>(valueA.getValue());
                         int castValue2 = any_cast<int>(valueB.getValue());
-                        IntValueCompare intValueCompare = IntValueCompare(castValue1, symbol, castValue2);
+                        IntValueComparator intValueCompare = IntValueComparator(castValue1, symbol, castValue2);
                         setCurrentResult(Value(ValueType::T_boolean, intValueCompare.compare()));
+                        break;
+                    }
+                    case ValueType::T_float: {
+                        float castValue1 = any_cast<float>(valueA.getValue());
+                        float castValue2 = any_cast<float>(valueB.getValue());
+                        FloatValueComparator floatValueComparator = FloatValueComparator(castValue1, symbol, castValue2);
+                        setCurrentResult(Value(ValueType::T_boolean, floatValueComparator.compare()));
                         break;
                     }
                 }
@@ -187,9 +219,9 @@ void MethodExecutor::execute() {
             }
             case Opcode::If: {
                 IfInstruction *ifInstruction = dynamic_cast<IfInstruction *>(instruction);
-                Value value= getRegisterValue(ifInstruction->getRegisterA());
-                bool castValue= any_cast<bool>(value.getValue());
-                if(castValue){
+                Value value = getRegisterValue(ifInstruction->getRegisterA());
+                bool castValue = any_cast<bool>(value.getValue());
+                if (castValue) {
                     gotoAddress(ifInstruction->getAddress());
                 }
                 break;
@@ -215,8 +247,22 @@ void MethodExecutor::execute() {
                                  classRuntime->getFieldValue(getFieldInstruction->getFieldName()));
                 break;
             }
+            case Opcode::Return: {
+                ReturnInstruction *returnInstruction = dynamic_cast<ReturnInstruction *>(instruction);
+                if (returnInstruction->isVoidType()) {
+                    returnVoid();
+                } else {
+                    returnResult(getRegisterValue(returnInstruction->getRegisterA()));
+                }
+                break;
+            }
             default:
                 throw RuntimeException("unsupported instruction opcode:" + opcode);
+        }
+    }
+    if (irMethod->getReturnType() != ValueType::T_void) {
+        if (!returnResultValue) {
+            throw RuntimeException(fmt::sprintf("non-void method must return an value:%s",irMethod->getName().data()));
         }
     }
 }

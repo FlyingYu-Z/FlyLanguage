@@ -14,10 +14,10 @@ private:
     map<string, Value> fieldValueMap = map<string, Value>();
 
 protected:
-    FileClass fileClass;
+    FileClass *fileClass;
 
 public:
-    ClassRuntime(const FileClass &fileClass);
+    ClassRuntime(FileClass *fileClass);
 
     Value getFieldValue(string fieldName);
 

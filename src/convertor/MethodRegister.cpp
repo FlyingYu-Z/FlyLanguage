@@ -11,11 +11,25 @@ MethodRegister::MethodRegister(Ast2IrConvertor *ast2IrConvertor) {
     this->plusSubTypeInference = new PlusSubTypeInference(this);
 }
 
+bool MethodRegister::isSubInstructionEnabled(){
+    return subInstructionSwitchMap[subKey];
+}
+
 void MethodRegister::addInstruction(Instruction *instruction) {
-    if (subInstructionEnabled) {
-        subInstructions.push_back(instruction);
+    if (isSubInstructionEnabled()) {
+        vector<Instruction *> *subInstructions=subInstructionsMap[subKey];
+        subInstructions->push_back(instruction);
     } else {
         instructions.push_back(instruction);
+    }
+}
+
+void MethodRegister::addInstruction(int index,Instruction *instruction){
+    if (isSubInstructionEnabled()) {
+        vector<Instruction *> *subInstructions=subInstructionsMap[subKey];
+        subInstructions->insert(subInstructions->begin()+index,instruction);
+    } else {
+        instructions.insert(instructions.begin()+index,instruction);
     }
 }
 
@@ -24,20 +38,36 @@ vector<Instruction *> MethodRegister::getInstructions() {
 }
 
 vector<Instruction *> MethodRegister::getSubInstructions() {
-    return subInstructions;
+    vector<Instruction *> *subInstructions=subInstructionsMap[subKey];
+    vector<Instruction *> cloneList(*subInstructions);
+    return cloneList;
 }
 
 void MethodRegister::enableSubInstruction() {
-    subInstructionEnabled = true;
-    subInstructions.clear();
+    subKey++;
+    subInstructionSwitchMap[subKey]= true;
+    subInstructionsMap[subKey]=new vector<Instruction *>();
 }
 
 void MethodRegister::disableSubInstruction() {
-    subInstructionEnabled = false;
+    subInstructionSwitchMap[subKey]= false;
+    clearSubInstructions();
+    subKey--;
 }
 
 int MethodRegister::getSubtractedSize() {
-    return subInstructions.size();
+//    vector<Instruction *> *previousInstructions=subInstructionsMap[subKey-1];
+    vector<Instruction *> *subInstructions=subInstructionsMap[subKey];
+//    if(previousInstructions){
+//        return subInstructions->size()+previousInstructions->size();
+//    }
+    return subInstructions->size();
+}
+
+void MethodRegister::clearSubInstructions(){
+    vector<Instruction *> *subInstructions=subInstructionsMap[subKey];
+    subInstructions->clear();
+    delete subInstructions;
 }
 
 void MethodRegister::rememberRegister(string variableName, int registerA) {
@@ -61,7 +91,12 @@ int MethodRegister::newRegister(string variableName) {
 }
 
 int MethodRegister::currentCodeAddress() {
-    return instructions.size() - 1;
+    vector<Instruction *> *previousInstructions=subInstructionsMap[subKey-1];
+    int originAddress=instructions.size() - 1;
+    if(previousInstructions){
+        originAddress+=previousInstructions->size();
+    }
+    return originAddress;
 }
 
 
@@ -70,6 +105,10 @@ int MethodRegister::getExprType(FlyScriptParser::ExprContext *exprContext) {
         return ValueType::T_int;
     } else if (FlyScriptParser::StringExprContext *stringExprContext = dynamic_cast<FlyScriptParser::StringExprContext *>(exprContext)) {
         return ValueType::T_string;
+    } else if (FlyScriptParser::BooleanTrueExprContext *booleanTrueExprContext = dynamic_cast<FlyScriptParser::BooleanTrueExprContext *>(exprContext)) {
+        return ValueType::T_boolean;
+    } else if (FlyScriptParser::BooleanFalseExprContext *booleanFalseExprContext = dynamic_cast<FlyScriptParser::BooleanFalseExprContext *>(exprContext)) {
+        return ValueType::T_boolean;
     } else if (FlyScriptParser::IdentifierExprContext *identifierExprContext = dynamic_cast<FlyScriptParser::IdentifierExprContext *>(exprContext)) {
         string variableName = identifierExprContext->children[0]->getText();
         int variableType = 0;
@@ -83,7 +122,9 @@ int MethodRegister::getExprType(FlyScriptParser::ExprContext *exprContext) {
         }
         return variableType;
     } else if (FlyScriptParser::InvokeExprContext *invokeExprContext = dynamic_cast<FlyScriptParser::InvokeExprContext *>(exprContext)) {
-
+        string methodName = dynamic_cast<TerminalNodeImpl *>(invokeExprContext->children[0])->getText();
+        int returnType = typeInMethodRemember->typeInClassRemember->getMethodReturnType(methodName);
+        return returnType;
     } else if (FlyScriptParser::PlusSubExprContext *plusSubExprContext = dynamic_cast<FlyScriptParser::PlusSubExprContext *>(exprContext)) {
         return plusSubTypeInference->getRealExprType(plusSubExprContext);
     }

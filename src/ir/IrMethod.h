@@ -5,9 +5,11 @@
 #ifndef FLYLANGUAGE_IRMETHOD_H
 #define FLYLANGUAGE_IRMETHOD_H
 
+#include <fmt/printf.h>
 #include "AllInstructions.h"
 
 using namespace std;
+using namespace fmt;
 
 class MethodParameter{
 
@@ -37,11 +39,11 @@ class IrMethod{
 private:
     int returnType;
     string name;
-    vector<MethodParameter> params;
+    vector<MethodParameter *> params;
     vector<Instruction *> instructions;
 
 public:
-    IrMethod(int returnType, const string &name, const vector<MethodParameter> &params,
+    IrMethod(int returnType, const string &name, const vector<MethodParameter *> &params,
              const vector<Instruction *> &instructions) : returnType(returnType), name(name), params(params),
                                                           instructions(instructions) {
 
@@ -55,12 +57,31 @@ public:
         return name;
     }
 
-    const vector<MethodParameter> &getParams() const {
+    const vector<MethodParameter *> &getParams() const {
         return params;
     }
 
     const vector<Instruction *> &getInstructions() const {
         return instructions;
+    }
+
+    string dump(){
+        string content="";
+        content.append(sprintf("%s %s(",ValueType::getName(returnType),name.data()));
+        for(MethodParameter *methodParameter:params){
+            content.append(sprintf("%s,",ValueType::getName(methodParameter->getType())));
+        }
+        if(params.size()>0) {
+            content.erase(content.size() - 1);
+        }
+        content.append(sprintf("){\n"));
+        int index=0;
+        for(Instruction *instruction:instructions){
+            content.append(sprintf("%d    %s\n",index, dumpInstruction(instruction)));
+            index++;
+        }
+        content.append(sprintf("}\n"));
+        return content;
     }
 
 };
@@ -89,8 +110,8 @@ public:
 class FileClass{
 
 private:
-    vector<IrField> fields;
-    vector<IrMethod> methods;
+    vector<IrField *> fields;
+    vector<IrMethod *> methods;
 
 public:
     StringPool *stringPool = new StringPool();
@@ -98,24 +119,41 @@ public:
     FileClass(){
 
     }
-    FileClass(const vector<IrField> &fields, const vector<IrMethod> &methods) : fields(fields), methods(methods) {
+
+    FileClass(const vector<IrField *> &fields, const vector<IrMethod *> &methods) : fields(fields), methods(methods) {
 
     }
 
-    void addField(IrField field){
+    void addField(IrField *field){
         fields.push_back(field);
     }
 
-    const vector<IrField> &getFields() const {
+    const vector<IrField *> &getFields() const {
         return fields;
     }
 
-    void addMethod(IrMethod method){
+    void addMethod(IrMethod *method){
         methods.push_back(method);
     }
 
-    const vector<IrMethod> &getMethods() const {
+    const vector<IrMethod *> &getMethods() const {
         return methods;
+    }
+
+    string dump(){
+        string content="";
+        for(IrField *field:fields){
+            content.append(sprintf("%s %s;\n\n",ValueType::getName(field->getType()),field->getName()));
+        }
+        for(IrMethod *method:methods){
+            content.append(sprintf("%s\n\n",method->dump().data()));
+        }
+        return content;
+    }
+
+    ~FileClass(){
+        fields.clear();
+        methods.clear();
     }
 
 

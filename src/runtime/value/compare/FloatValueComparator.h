@@ -1,16 +1,16 @@
 //
-// Created by flying on 2023/1/8.
+// Created by flying on 2023/1/9.
 //
 
-#ifndef FLYLANGUAGE_INTVALUECOMPARE_H
-#define FLYLANGUAGE_INTVALUECOMPARE_H
+#ifndef FLYLANGUAGE_FLOATVALUECOMPARATOR_H
+#define FLYLANGUAGE_FLOATVALUECOMPARATOR_H
 
-#include "ValueCompare.h"
+#include "ValueComparator.h"
 
-class IntValueCompare : public ValueCompare<int> {
+class FloatValueComparator : public ValueComparator<float> {
 
 public:
-    IntValueCompare(int value1, int symbol, int value2) : ValueCompare(value1, symbol, value2) {
+    FloatValueComparator(float value1, int symbol, float value2) : ValueComparator(value1, symbol, value2) {
 
     }
 
@@ -30,7 +30,7 @@ public:
         return value1 > value2;
     }
 
-    bool compareLesserrOrEqual() override {
+    bool compareLesserOrEqual() override {
         return value1 <= value2;
     }
 
@@ -38,10 +38,10 @@ public:
         return value1 < value2;
     }
 
-    ~IntValueCompare() override {
+    ~FloatValueComparator() override {
 
     }
 
 };
 
-#endif //FLYLANGUAGE_INTVALUECOMPARE_H
+#endif //FLYLANGUAGE_FLOATVALUECOMPARATOR_H

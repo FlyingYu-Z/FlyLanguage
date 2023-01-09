@@ -14,18 +14,20 @@ X_OPCODE(Nop, "nop", 0x000) \
 X_OPCODE(ConstInt, "const-int", 0x001) \
 X_OPCODE(ConstString, "const-string", 0x002) \
 X_OPCODE(ConstFloat,"const-float", 0x003)\
-X_OPCODE(ConstParam,"const-param", 0x004)\
-X_OPCODE(MoveResultObject,"move-result-object", 0x005)\
-X_OPCODE(Move,"move", 0x006)\
-X_OPCODE(Invoke,"invoke", 0x007)\
-X_OPCODE(Plus,"plus", 0x008)\
-X_OPCODE(Sub,"sub", 0x009)\
-X_OPCODE(Bool,"bool", 0x010)\
-X_OPCODE(If,"if", 0x011)\
-X_OPCODE(IfNot,"if-not", 0x012)\
-X_OPCODE(Goto,"goto", 0x013)\
-X_OPCODE(SetField,"set-field", 0x014)\
-X_OPCODE(GetField,"get-field", 0x015)\
+X_OPCODE(ConstBoolean,"const-boolean", 0x004)\
+X_OPCODE(ConstParam,"const-param", 0x005)\
+X_OPCODE(MoveResultObject,"move-result-object", 0x006)\
+X_OPCODE(Move,"move", 0x007)\
+X_OPCODE(Invoke,"invoke", 0x008)\
+X_OPCODE(Plus,"plus", 0x009)\
+X_OPCODE(Sub,"sub", 0x0010)\
+X_OPCODE(Bool,"bool", 0x011)\
+X_OPCODE(If,"if", 0x012)\
+X_OPCODE(IfNot,"if-not", 0x013)\
+X_OPCODE(Goto,"goto", 0x014)\
+X_OPCODE(SetField,"set-field", 0x015)\
+X_OPCODE(GetField,"get-field", 0x016)\
+X_OPCODE(Return,"return", 0x017)\
 
 class Opcode {
 public:

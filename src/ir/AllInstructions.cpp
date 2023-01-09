@@ -3,7 +3,7 @@
 //
 #include "AllInstructions.h"
 
-string dump(Instruction *instruction) {
+string dumpInstruction(Instruction *instruction) {
     int opcode = instruction->getOpcode();
     const char *opcodeName = Opcode::getOpcodeName(opcode);
     std::string formatted = "";
@@ -30,6 +30,12 @@ string dump(Instruction *instruction) {
                                      std::to_string(constFloatInstruction->getValue()));
             break;
         }
+        case Opcode::ConstBoolean: {
+            ConstBooleanInstruction *constBooleanInstruction = dynamic_cast<ConstBooleanInstruction *>(instruction);
+            formatted = fmt::sprintf("%s v%d,%d", opcodeName, constBooleanInstruction->getRegisterA(),
+                                     std::to_string(constBooleanInstruction->isValue() ? 1 : 0));
+            break;
+        }
         case Opcode::ConstParam: {
             ConstParamInstruction *constParamInstruction = dynamic_cast<ConstParamInstruction *>(instruction);
             formatted = fmt::sprintf("%s v%d,%d", opcodeName, constParamInstruction->getRegisterA(),
@@ -51,9 +57,11 @@ string dump(Instruction *instruction) {
             InvokeInstruction *invokeInstruction = dynamic_cast<InvokeInstruction *>(instruction);
             string params = "";
             for (int reg: invokeInstruction->getRegisterList()) {
-                params = params + std::to_string(reg) + ",";
+                params = params + "v" + std::to_string(reg) + ",";
             }
-            params.erase(params.end() - 1);
+            if (params.size() > 1) {
+                params.erase(params.end() - 1);
+            }
             formatted = fmt::sprintf("%s %s(%s)", opcodeName, invokeInstruction->getMethodName().data(), params.data());
             break;
         }
@@ -90,22 +98,32 @@ string dump(Instruction *instruction) {
         }
         case Opcode::Goto: {
             GotoInstruction *gotoInstruction = dynamic_cast<GotoInstruction *>(instruction);
-            formatted = fmt::sprintf("%s %d,%d", gotoInstruction->getAddress());
+            formatted = fmt::sprintf("%s %d", opcodeName, gotoInstruction->getAddress());
             break;
         }
         case Opcode::SetField: {
             SetFieldInstruction *setFieldInstruction = dynamic_cast<SetFieldInstruction *>(instruction);
-            formatted = fmt::sprintf("%s v%d,%s", setFieldInstruction->getRegisterA(),setFieldInstruction->getFieldName().data());
+            formatted = fmt::sprintf("%s v%d,%s", opcodeName, setFieldInstruction->getRegisterA(),
+                                     setFieldInstruction->getFieldName().data());
             break;
         }
         case Opcode::GetField: {
             GetFieldInstruction *getFieldInstruction = dynamic_cast<GetFieldInstruction *>(instruction);
-            formatted = fmt::sprintf("%s v%d,%s", getFieldInstruction->getRegisterA(),getFieldInstruction->getFieldName().data());
+            formatted = fmt::sprintf("%s v%d,%s", opcodeName, getFieldInstruction->getRegisterA(),
+                                     getFieldInstruction->getFieldName().data());
+            break;
+        }
+        case Opcode::Return: {
+            ReturnInstruction *returnInstruction = dynamic_cast<ReturnInstruction *>(instruction);
+            if (returnInstruction->isVoidType()) {
+                formatted = fmt::sprintf("%s void", opcodeName);
+            } else {
+                formatted = fmt::sprintf("%s v%d", opcodeName, returnInstruction->getRegisterA());
+            }
             break;
         }
         default:
             throw std::runtime_error("unknown opcode value");
-            //break;
     }
     int length = formatted.length() + 1;
     char *tmp = new char[length];

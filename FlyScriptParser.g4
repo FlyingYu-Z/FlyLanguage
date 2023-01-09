@@ -36,6 +36,8 @@ stmt
     block #codeBlock
     |   type ID ('=' expr)? ';' #varStmt
     |   'if' '(' expr ')' block ('else' block)? #ifElseStmt
+    |   'while' '(' expr ')' block #whileStmt
+    |   'break' ';' #breakStmt
     |   'return' expr? ';' #returnStmt
     |   expr '=' expr ';' #assignStmt // assignment
     |   expr ';' #invokeStmt         // func call
@@ -61,6 +63,8 @@ expr:   ID '(' exprList? ')' #invokeExpr   // func call like f(), f(x), f(1,2)
     |   expr '&&' expr #andBooleanExpr
     |   ID #identifierExpr                     // variable reference
     |   INT #intExpr
+    |   Kv_True #booleanTrueExpr
+    |   Kv_False #booleanFalseExpr
     |   DQUOTE stringContents* DQUOTE #stringExpr
     |   '(' expr ')' #parensExpr
     ;

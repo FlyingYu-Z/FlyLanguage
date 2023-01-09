@@ -1,25 +1,25 @@
-int a=130;
-print("hello");
-if(a>10){
-println("大于10");
+
+testIf();
+//testIfInWhile();
+
+void testIf(){
+int i=1;
+if(i<9999){
+println("i->"+i);
+break;
 }else{
-println("小于");
+println("less");
 }
-a=128;
-print(a);
-
-test(133456);
-
-void test(int i){
-int key=101;
-println("test->"+i);
-
-if(a>11){
-println("test->"+"大于11");
-}else{
-println("test->"+"小于");
 }
 
+void testIfInWhile(){
+int i=1;
+while(i>0){
+if(i>9999){
+println("before break");
+break;
 }
-int cc=a+10;
-print("cc->"+cc);
+println("i->"+i);
+i=i+1;
+}
+}

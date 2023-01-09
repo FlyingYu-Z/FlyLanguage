@@ -17,12 +17,12 @@ public:
 
     Function2IrMethodConvertor(Ast2IrConvertor *ast2IrConvertor, FlyScriptParser::FunctionContext *functionContext);
 
-    IrMethod generateIrMethod();
+    IrMethod *generateIrMethod();
 
     ~Function2IrMethodConvertor();
 
 private:
-    MethodParameter parseMethodParameter(FlyScriptParser::FunctionParameterContext *functionParameterContext);
+    MethodParameter *parseMethodParameter(FlyScriptParser::FunctionParameterContext *functionParameterContext);
 
 };
 

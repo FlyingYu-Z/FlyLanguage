@@ -8,6 +8,7 @@
 #include "ConstStringInstruction.h"
 #include "ConstIntInstruction.h"
 #include "ConstFloatInstruction.h"
+#include "ConstBooleanInstruction.h"
 #include "ConstParamInstruction.h"
 #include "MoveResultObjectInstruction.h"
 #include "MoveInstruction.h"
@@ -20,9 +21,10 @@
 #include "GotoInstruction.h"
 #include "SetFieldInstruction.h"
 #include "GetFieldInstruction.h"
+#include "ReturnInstruction.h"
 
 
-extern string dump(Instruction *instruction);
+extern string dumpInstruction(Instruction *instruction);
 
 
 #endif //FLYLANGUAGE_ALLINSTRUCTIONS_H
