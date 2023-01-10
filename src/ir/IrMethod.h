@@ -77,7 +77,7 @@ public:
         content.append(sprintf("){\n"));
         int index=0;
         for(Instruction *instruction:instructions){
-            content.append(sprintf("%d    %s\n",index, dumpInstruction(instruction)));
+            content.append(sprintf("%02d    %s\n",index, dumpInstruction(instruction)));
             index++;
         }
         content.append(sprintf("}\n"));

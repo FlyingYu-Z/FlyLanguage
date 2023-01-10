@@ -1,6 +1,6 @@
 
 testIf();
-//testIfInWhile();
+testIfInWhile();
 
 void testIf(){
 int i=1;
@@ -18,6 +18,8 @@ while(i>0){
 if(i>9999){
 println("before break");
 break;
+}else{
+println("else");
 }
 println("i->"+i);
 i=i+1;

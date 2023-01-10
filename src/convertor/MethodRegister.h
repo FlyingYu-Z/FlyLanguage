@@ -20,10 +20,11 @@ protected:
     //variableName,register
     map<string, int> registerMap = map<string, int>();
     vector<Instruction *> instructions = vector<Instruction *>();
-    map<int, bool> subInstructionSwitchMap = map<int, bool>();
-    map<int, vector<Instruction *> *> subInstructionsMap = map<int, vector<Instruction *> *>();
-    int subKey = 0;
+    vector<int> preparedPosList = vector<int>();
+    bool isChild = false;
+    int continueCodeAddress = 0;//useful only isChild=true
 public:
+    MethodRegister *parentMethodRegister;
     typedef vector<Instruction *> InstructionList;
     TypeInMethodRemember *typeInMethodRemember;
     PlusSubTypeInference *plusSubTypeInference;
@@ -31,25 +32,27 @@ public:
 
     MethodRegister(Ast2IrConvertor *ast2IrConvertor);
 
+    MethodRegister(MethodRegister *methodRegister);
+
 private:
     bool isSubInstructionEnabled();
 
 public:
-    void addInstruction(Instruction *instruction);
+    int addInstruction(Instruction *instruction);
 
-    void addInstruction(int index,Instruction *instruction);
+    void prepareInstruction(int count);
+
+    int prepareInstruction();
+
+    void patchPreparedInstruction(Instruction *instruction);
+
+    void patchPreparedInstructionForIndex(int index, Instruction *instruction);
+
+    void addInstruction(int index, Instruction *instruction);
+
+    void replaceInstruction(int index, Instruction *instruction);
 
     vector<Instruction *> getInstructions();
-
-    vector<Instruction *> getSubInstructions();
-
-    void enableSubInstruction();
-
-    void disableSubInstruction();
-
-    int getSubtractedSize();
-
-    void clearSubInstructions();
 
     void rememberRegister(string variableName, int registerA);
 
