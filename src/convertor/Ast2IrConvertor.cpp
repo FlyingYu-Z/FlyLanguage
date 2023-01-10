@@ -99,41 +99,39 @@ void Ast2IrConvertor::parseStmt(vector<ParseTree *> rawStmtList, MethodRegister 
                 int block1StartAddress = methodRegister->currentCodeAddress();
 
                 auto *block1 = dynamic_cast<FlyScriptParser::BlockContext *>(ifElseStmtContext->children[4]);
-                auto childMethodRegister = new MethodRegister(methodRegister);
-                parseBlock(block1, childMethodRegister);
+                auto block1MethodRegister = new MethodRegister(methodRegister);
+                parseBlock(block1, block1MethodRegister);
 
-                block1EndGotoInstructionIndex=childMethodRegister->addInstruction(new NopInstruction());
+                block1EndGotoInstructionIndex=block1MethodRegister->addInstruction(new NopInstruction());
 
-                int block1InstructionCount = childMethodRegister->getInstructions().size();
+                int block1InstructionCount = block1MethodRegister->getInstructions().size();
                 int block1EndAddress = block1StartAddress + block1InstructionCount;
 
                 methodRegister->patchPreparedInstruction(new IfInstruction(finalRegister, block1StartAddress));
                 methodRegister->patchPreparedInstruction(new GotoInstruction(block1EndAddress));
 
-                for (Instruction *instruction: childMethodRegister->getInstructions()) {
+                for (Instruction *instruction: block1MethodRegister->getInstructions()) {
                     methodRegister->addInstruction(instruction);
                 }
-                delete childMethodRegister;
+                delete block1MethodRegister;
             }
 
             if (ifElseStmtContext->children.size() > 5) {
                 int block2StartAddress = methodRegister->currentCodeAddress();
                 auto *block2 = dynamic_cast<FlyScriptParser::BlockContext *>(ifElseStmtContext->children[6]);
-                auto childMethodRegister = new MethodRegister(methodRegister);
-                parseBlock(block2, childMethodRegister);
-                int block2InstructionCount = childMethodRegister->getInstructions().size();
+                auto block2MethodRegister = new MethodRegister(methodRegister);
+                parseBlock(block2, block2MethodRegister);
+                int block2InstructionCount = block2MethodRegister->getInstructions().size();
                 int block2EndAddress = block2StartAddress + block2InstructionCount;
                 if (block2InstructionCount == 0) {
                     continue;
                 }
-                for (Instruction *instruction: childMethodRegister->getInstructions()) {
+                for (Instruction *instruction: block2MethodRegister->getInstructions()) {
                     methodRegister->addInstruction(instruction);
                 }
-                delete childMethodRegister;
+                delete block2MethodRegister;
                 //待解决相对地址
                 methodRegister->replaceInstruction(block1EndGotoInstructionIndex,new GotoInstruction(block2EndAddress));
-
-                print("ff");
             }
 
         } else if (FlyScriptParser::WhileStmtContext *whileStmtContext = dynamic_cast<FlyScriptParser::WhileStmtContext *>(stmtContext)) {

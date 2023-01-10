@@ -25,8 +25,16 @@ public:
         return registerA;
     }
 
+    void setRegisterA(int registerA) {
+        IfInstruction::registerA = registerA;
+    }
+
     int getAddress() const {
         return address;
+    }
+
+    void setAddress(int address) {
+        IfInstruction::address = address;
     }
 
     int getOpcode() override {

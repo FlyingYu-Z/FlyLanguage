@@ -23,7 +23,7 @@ MethodRegister::MethodRegister(MethodRegister *methodRegister) {
 
 int MethodRegister::addInstruction(Instruction *instruction) {
     instructions.push_back(instruction);
-    return currentCodeAddress()-1;
+    return currentCodeAddress() -1;
 }
 
 void MethodRegister::prepareInstruction(int count) {

@@ -24,6 +24,10 @@ public:
         return address;
     }
 
+    void setAddress(int address) {
+        GotoInstruction::address = address;
+    }
+
     int getOpcode() override {
         return Opcode::Goto;
     }
