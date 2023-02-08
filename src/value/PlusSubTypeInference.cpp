@@ -3,7 +3,7 @@
 //
 #include "PlusSubTypeInference.h"
 
-PlusSubTypeInference::PlusSubTypeInference(MethodRegister *methodRegister) : methodRegister(methodRegister) {
+PlusSubTypeInference::PlusSubTypeInference(MethodBlock *methodRegister) : methodBlock(methodRegister) {
 
 }
 
@@ -34,8 +34,8 @@ bool PlusSubTypeInference::isStringAndString(FlyScriptParser::ExprContext *expr1
 
 bool PlusSubTypeInference::isSameType(FlyScriptParser::ExprContext *expr1,
                                       FlyScriptParser::ExprContext *expr2, int valueType) {
-    int type1 = methodRegister->getExprType(expr1);
-    int type2 = methodRegister->getExprType(expr2);
+    int type1 = methodBlock->state->getExprType(expr1);
+    int type2 = methodBlock->state->getExprType(expr2);
     return type1 == valueType && type2 == valueType;
 }
 
@@ -44,12 +44,18 @@ bool PlusSubTypeInference::isIntAndString(FlyScriptParser::ExprContext *expr1,
     return containsTow(expr1, expr2, ValueType::T_int, ValueType::T_string);
 }
 
+bool PlusSubTypeInference::isContainsString(FlyScriptParser::ExprContext *expr1, FlyScriptParser::ExprContext *expr2) {
+    int type1 = methodBlock->state->getExprType(expr1);
+    int type2 = methodBlock->state->getExprType(expr2);
+    return type1 == ValueType::T_string || type2 == ValueType::T_string;
+}
+
 bool
 PlusSubTypeInference::containsTow(FlyScriptParser::ExprContext *expr1,
                                   FlyScriptParser::ExprContext *expr2, int valueType1,
                                   int valueType2) {
-    int type1 = methodRegister->getExprType(expr1);
-    int type2 = methodRegister->getExprType(expr2);
+    int type1 = methodBlock->state->getExprType(expr1);
+    int type2 = methodBlock->state->getExprType(expr2);
     if (type1 == type2) {
         return false;
     }

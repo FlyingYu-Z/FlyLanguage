@@ -1,0 +1,16 @@
+
+testIf();
+
+void testIf(){
+int i=1;
+if(i<9999){
+println("i->"+i);
+if(i<9999){
+println("i->"+i);
+}else{
+println("less");
+}
+}else{
+println("less");
+}
+}

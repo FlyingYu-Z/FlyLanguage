@@ -1,0 +1,49 @@
+
+testIfInWhile();
+testIf();
+
+void testWhile(){
+int i=1;
+while(i>0-1){
+println("i->"+i);
+i=i+1;
+}
+}
+
+
+void testIf(){
+int i=1;
+if(i<9999){
+println("i->"+i);
+}else{
+println("less");
+}
+}
+
+
+//备注:替换绝对地址需要用全局block
+void testIfInWhile(){
+int i=1;
+while(i>0){
+if(i==9998){
+println("i=9998");
+}
+if(i>9999){
+if(i>10){
+println("i>10");
+if(i>10){
+println("i>10");
+if(i==9998){
+println("i=9998");
+}
+}
+}
+println("before break");
+break;
+}else{
+println("else");
+}
+println("i->"+i);
+i=i+1;
+}
+}

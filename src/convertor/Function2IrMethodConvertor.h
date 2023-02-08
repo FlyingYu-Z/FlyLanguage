@@ -13,7 +13,7 @@ class Function2IrMethodConvertor {
 public:
     Ast2IrConvertor *ast2IrConvertor;
     FlyScriptParser::FunctionContext *functionContext;
-    MethodRegister *methodRegister;
+    MethodBlock *methodBlock;
 
     Function2IrMethodConvertor(Ast2IrConvertor *ast2IrConvertor, FlyScriptParser::FunctionContext *functionContext);
 

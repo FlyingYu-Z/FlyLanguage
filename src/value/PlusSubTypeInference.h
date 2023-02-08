@@ -7,7 +7,7 @@
 
 #include "Ast2IrConvertor.h"
 
-class MethodRegister;
+class MethodBlock;
 
 class Ast2IrConvertor;
 
@@ -15,9 +15,9 @@ class Ast2IrConvertor;
 class PlusSubTypeInference {
 
 public:
-    MethodRegister *methodRegister;
+    MethodBlock *methodBlock;
 
-    PlusSubTypeInference(MethodRegister *methodRegister);
+    PlusSubTypeInference(MethodBlock *methodRegister);
 
     int getRealExprType(FlyScriptParser::PlusSubExprContext *plusSubExprContext);
 
@@ -28,6 +28,8 @@ public:
     bool isSameType(FlyScriptParser::ExprContext *expr1, FlyScriptParser::ExprContext *expr2, int valueType);
 
     bool isIntAndString(FlyScriptParser::ExprContext *expr1, FlyScriptParser::ExprContext *expr2);
+
+    bool isContainsString(FlyScriptParser::ExprContext *expr1, FlyScriptParser::ExprContext *expr2);
 
 private:
     bool

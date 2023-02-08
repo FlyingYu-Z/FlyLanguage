@@ -60,6 +60,7 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/generated
         ${PROJECT_SOURCE_DIR}/utils
         ${PROJECT_SOURCE_DIR}/src/convertor
+#        ${PROJECT_SOURCE_DIR}/src/convertor/parser
         ${PROJECT_SOURCE_DIR}/src/value
         ${PROJECT_SOURCE_DIR}/src/ir
         ${PROJECT_SOURCE_DIR}/src/utils
@@ -76,6 +77,8 @@ file(GLOB SOURCE_FILES
         "${PROJECT_SOURCE_DIR}/src/convertor/*.h"
         "${PROJECT_SOURCE_DIR}/src/convertor/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/convertor/*.hpp"
+#        "${PROJECT_SOURCE_DIR}/src/convertor/parser/*.h"
+#        "${PROJECT_SOURCE_DIR}/src/convertor/parser/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/value/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/value/*.hpp"
         "${PROJECT_SOURCE_DIR}/src/ir/*.cpp"

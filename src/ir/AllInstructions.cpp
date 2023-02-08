@@ -8,6 +8,10 @@ string dumpInstruction(Instruction *instruction) {
     const char *opcodeName = Opcode::getOpcodeName(opcode);
     std::string formatted = "";
     switch (opcode) {
+        case Opcode::Break: {
+            formatted = fmt::sprintf("%s", opcodeName);
+            break;
+        }
         case Opcode::Nop: {
             formatted = fmt::sprintf("%s", opcodeName);
             break;

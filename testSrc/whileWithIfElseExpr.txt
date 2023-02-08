@@ -1,0 +1,51 @@
+
+testWhile();
+testWhile2();
+
+void testWhile(){
+int i=1;
+while(i>0-1){
+println("i->"+i);
+if(i<9999){
+println("i->"+i);
+}else{
+println("less");
+}
+if(i==10000){
+println("before break1");
+i=1;
+while(i>0-1){
+println("i->"+i);
+if(i<9999){
+println("i->"+i);
+}else{
+println("less");
+}
+if(i==10000){
+println("before break1");
+break;
+}
+i=i+1;
+}
+break;
+}
+i=i+1;
+}
+}
+
+void testWhile2(){
+int i=1;
+while(i>0-1){
+println("i->"+i);
+if(i<9999){
+println("i->"+i);
+}else{
+println("less");
+}
+if(i==10000){
+println("before break 2");
+break;
+}
+i=i+1;
+}
+}

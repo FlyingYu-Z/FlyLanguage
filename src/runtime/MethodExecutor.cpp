@@ -189,6 +189,27 @@ void MethodExecutor::execute() {
             }
             case Opcode::Sub: {
                 SubInstruction *subInstruction = dynamic_cast<SubInstruction *>(instruction);
+                Value valueA = getRegisterValue(subInstruction->getRegisterA());
+                Value valueB = getRegisterValue(subInstruction->getRegisterB());
+                int type1 = valueA.getType();
+                int type2 = valueB.getType();
+                int highestType = ValueCalc::getHighestTypeForPlusInstruction(type1, type2);
+                switch (highestType) {
+                    case ValueType::T_int: {
+                        int castValue1 = any_cast<int>(valueA.getValue());
+                        int castValue2 = any_cast<int>(valueB.getValue());
+                        int plusValue = castValue1 - castValue2;
+                        setCurrentResult(Value(ValueType::T_int, plusValue));
+                        break;
+                    }
+                    case ValueType::T_float: {
+                        float castValue1 = any_cast<float>(valueA.getValue());
+                        float castValue2 = any_cast<float>(valueB.getValue());
+                        float plusValue = castValue1 - castValue2;
+                        setCurrentResult(Value(ValueType::T_float, plusValue));
+                        break;
+                    }
+                }
                 break;
             }
             case Opcode::Bool: {

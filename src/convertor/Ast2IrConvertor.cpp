@@ -3,31 +3,22 @@
 //
 #include "Ast2IrConvertor.h"
 
-
 Ast2IrConvertor::Ast2IrConvertor(FlyScriptParser::FileContext *fileContext) {
     this->tree = fileContext;
 }
 
-//int Ast2IrConvertor::parseBlockInstructionCount(FlyScriptParser::BlockContext *blockContext,
-//                                                MethodRegister *methodRegister) {
-//    auto *childMethodRegister = new MethodRegister(methodRegister);
-//    parseBlock(blockContext, childMethodRegister);
-//    int count = childMethodRegister->getInstructions().size();
-//    delete childMethodRegister;
-//    return count;
-//}
-
-void Ast2IrConvertor::parseBlock(FlyScriptParser::BlockContext *blockContext, MethodRegister *methodRegister) {
+void
+Ast2IrConvertor::parseBlock(FlyScriptParser::BlockContext *blockContext, MethodBlock *methodBlock) {
     vector<ParseTree *> rawStatList = vector<ParseTree *>();
     for (ParseTree *child: blockContext->children) {
         if (FlyScriptParser::StmtContext *stmtContext = dynamic_cast<FlyScriptParser::StmtContext *>(child)) {
             rawStatList.push_back(stmtContext);
         }
     }
-    parseStmt(rawStatList, methodRegister);
+    parseStmt(rawStatList, methodBlock);
 }
 
-void Ast2IrConvertor::parseStmt(vector<ParseTree *> rawStmtList, MethodRegister *methodRegister) {
+void Ast2IrConvertor::parseStmt(vector<ParseTree *> rawStmtList, MethodBlock *methodBlock) {
     for (ParseTree *stmtContext: rawStmtList) {
         if (FlyScriptParser::FieldContext *fieldContext = dynamic_cast<FlyScriptParser::FieldContext *>(stmtContext)) {
             string typeString = Ast2IrConvertor::typeContextToString(
@@ -35,52 +26,61 @@ void Ast2IrConvertor::parseStmt(vector<ParseTree *> rawStmtList, MethodRegister 
             int type = ValueType::getType(typeString);
             string fieldName = dynamic_cast<TerminalNodeImpl *>(fieldContext->children[1])->getText();
             auto valueExpr = dynamic_cast<FlyScriptParser::ExprContext *>(fieldContext->children[3]);
-            int registerA = getExprRegister(valueExpr, type, methodRegister);
-            methodRegister->rememberRegister(fieldName, registerA);
+            ExprResult exprResultA = getExprResult(valueExpr, type, methodBlock);
+            exprResultA.commitInstruction(methodBlock);
+            int registerA = exprResultA.resultRegister;
+            methodBlock->state->rememberRegister(fieldName, registerA);
             typeInClassRemember->putFieldType(fieldName, type);
-            methodRegister->addInstruction(new SetFieldInstruction(registerA, fieldName));
+            methodBlock->addInstruction(new SetFieldInstruction(registerA, fieldName));
         } else if (FlyScriptParser::VarStmtContext *varStmtContext = dynamic_cast<FlyScriptParser::VarStmtContext *>(stmtContext)) {
             string typeString = Ast2IrConvertor::typeContextToString(
                     dynamic_cast<FlyScriptParser::TypeContext *>(varStmtContext->children[0]));
             int type = ValueType::getType(typeString);
             string variableName = dynamic_cast<TerminalNodeImpl *>(varStmtContext->children[1])->getText();
             auto valueExpr = dynamic_cast<FlyScriptParser::ExprContext *>(varStmtContext->children[3]);
-            int registerA = getExprRegister(valueExpr, type, methodRegister);
-            methodRegister->rememberRegister(variableName, registerA);
-            methodRegister->typeInMethodRemember->putVariableType(variableName, type);
+            ExprResult exprResultA = getExprResult(valueExpr, type, methodBlock);
+            exprResultA.commitInstruction(methodBlock);
+            int registerA = exprResultA.resultRegister;
+            methodBlock->state->rememberRegister(variableName, registerA);
+            methodBlock->state->typeInMethodRemember->putVariableType(variableName, type);
         } else if (FlyScriptParser::AssignStmtContext *assignStmtContext = dynamic_cast<FlyScriptParser::AssignStmtContext *>(stmtContext)) {
             string variableName = dynamic_cast<FlyScriptParser::IdentifierExprContext *>(assignStmtContext->children[0])->getText();
             auto valueExpr = dynamic_cast<FlyScriptParser::ExprContext *>(assignStmtContext->children[2]);
-            int exprType = methodRegister->getExprType(valueExpr);
-            if (methodRegister->isFieldVariable(variableName)) {
+            int exprType = methodBlock->state->getExprType(valueExpr);
+            if (methodBlock->state->isFieldVariable(variableName)) {
                 int originType = typeInClassRemember->getFieldType(variableName);
                 if (exprType != originType) {
                     throw CompileException(
                             fmt::sprintf("the origin file type is %d,but new field type is %d", originType, exprType));
                 }
-                //val oldRegister = methodRegister.getRegister(variableName) ?: throw NonRegisterException(variableName)
-                int newRegister = getExprRegister(valueExpr, originType, methodRegister);
-                methodRegister->addInstruction(new SetFieldInstruction(newRegister, variableName));
+                //val oldRegister = methodBlock.getRegister(variableName) ?: throw NonRegisterException(variableName)
+                ExprResult exprResultA = getExprResult(valueExpr, originType, methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                int newRegister = exprResultA.resultRegister;
+                methodBlock->addInstruction(new SetFieldInstruction(newRegister, variableName));
             } else {
-                int originType = methodRegister->typeInMethodRemember->getVariableType(variableName);
+                int originType = methodBlock->state->typeInMethodRemember->getVariableType(variableName);
                 if (exprType != originType) {
                     throw CompileException(
                             fmt::sprintf("the origin file type is %d,but new field type is %d", originType, exprType));
                 }
-                int oldRegister = methodRegister->getRegister(variableName);
+                int oldRegister = methodBlock->state->getRegister(variableName);
                 if (!oldRegister) {
                     throw NonRegisterException(variableName.data());
                 }
-                int newRegister = getExprRegister(valueExpr, originType, methodRegister);
-                methodRegister->addInstruction(new MoveInstruction(oldRegister, newRegister));
+                ExprResult exprResultA = getExprResult(valueExpr, originType, methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                int newRegister = exprResultA.resultRegister;
+                methodBlock->addInstruction(new MoveInstruction(oldRegister, newRegister));
             }
         } else if (FlyScriptParser::InvokeStmtContext *invokeStmtContext = dynamic_cast<FlyScriptParser::InvokeStmtContext *>(stmtContext)) {
             auto childStmt = invokeStmtContext->children[0];
             if (FlyScriptParser::InvokeExprContext *invokeExprContext = dynamic_cast<FlyScriptParser::InvokeExprContext *>(childStmt)) {
                 //string methodName = dynamic_cast<TerminalNodeImpl *>(invokeExprContext->children[0])->getText();
-                int invokeResultRegister = getExprRegister(invokeExprContext,
-                                                           methodRegister->getExprType(invokeExprContext),
-                                                           methodRegister);
+                ExprResult exprResultA = getExprResult(invokeExprContext,
+                                                       methodBlock->state->getExprType(invokeExprContext), methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                int invokeResultRegister = exprResultA.resultRegister;
             } else {
                 throw CompileException("InvokeStmtContext must be InvokeExprContext");
             }
@@ -90,143 +90,196 @@ void Ast2IrConvertor::parseStmt(vector<ParseTree *> rawStmtList, MethodRegister 
             if (FlyScriptParser::OrBooleanExprContext *orBooleanExprContext = dynamic_cast<FlyScriptParser::OrBooleanExprContext *>(expr)) {
                 finalRegister = 0;
             } else {
-                finalRegister = getExprRegister(expr, ValueType::T_boolean, methodRegister);
+                ExprResult exprResultA = getExprResult(expr, ValueType::T_boolean, methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                finalRegister = exprResultA.resultRegister;
             }
 
-            int block1EndGotoInstructionIndex;
             {
-                methodRegister->prepareInstruction(2);
-                int block1StartAddress = methodRegister->currentCodeAddress();
+                IfInstruction *ifInstruction = new IfInstruction(finalRegister, -1);
+                GotoInstruction *gotoInstruction = new GotoInstruction(-1);
+                methodBlock->addInstruction(ifInstruction);
+                methodBlock->addInstruction(gotoInstruction);
+                int block1StartAddress = methodBlock->nextCodeAddress();
+                ifInstruction->setAddress(block1StartAddress);
 
                 auto *block1 = dynamic_cast<FlyScriptParser::BlockContext *>(ifElseStmtContext->children[4]);
-                auto block1MethodRegister = new MethodRegister(methodRegister);
-                parseBlock(block1, block1MethodRegister);
+                auto methodBlock1 = methodBlock->newChildBlock();
+                parseBlock(block1, methodBlock1);
 
-                block1EndGotoInstructionIndex=block1MethodRegister->addInstruction(new NopInstruction());
-
-                int block1InstructionCount = block1MethodRegister->getInstructions().size();
-                int block1EndAddress = block1StartAddress + block1InstructionCount;
-
-                methodRegister->patchPreparedInstruction(new IfInstruction(finalRegister, block1StartAddress));
-                methodRegister->patchPreparedInstruction(new GotoInstruction(block1EndAddress));
-
-                for (Instruction *instruction: block1MethodRegister->getInstructions()) {
-                    methodRegister->addInstruction(instruction);
+                for (Instruction *instruction: methodBlock1->getInstructions()) {
+                    methodBlock->addInstruction(instruction);
                 }
-                delete block1MethodRegister;
+                int block1EndAddress = methodBlock->nextCodeAddress();
+                gotoInstruction->setAddress(block1EndAddress);
+
+                delete methodBlock1;
             }
 
             if (ifElseStmtContext->children.size() > 5) {
-                int block2StartAddress = methodRegister->currentCodeAddress();
+                GotoInstruction *gotoBlock2EndInstruction = new GotoInstruction(-1);
+                methodBlock->addInstruction(gotoBlock2EndInstruction);
                 auto *block2 = dynamic_cast<FlyScriptParser::BlockContext *>(ifElseStmtContext->children[6]);
-                auto block2MethodRegister = new MethodRegister(methodRegister);
-                parseBlock(block2, block2MethodRegister);
-                int block2InstructionCount = block2MethodRegister->getInstructions().size();
-                int block2EndAddress = block2StartAddress + block2InstructionCount;
+                auto methodBlock2 = methodBlock->newChildBlock();
+                parseBlock(block2, methodBlock2);
+                int block2InstructionCount = methodBlock2->getInstructions().size();
                 if (block2InstructionCount == 0) {
                     continue;
                 }
-                for (Instruction *instruction: block2MethodRegister->getInstructions()) {
-                    methodRegister->addInstruction(instruction);
+                for (Instruction *instruction: methodBlock2->getInstructions()) {
+                    methodBlock->addInstruction(instruction);
                 }
-                delete block2MethodRegister;
-                //待解决相对地址
-                methodRegister->replaceInstruction(block1EndGotoInstructionIndex,new GotoInstruction(block2EndAddress));
+                int block2EndAddress = methodBlock->nextCodeAddress();
+                gotoBlock2EndInstruction->setAddress(block2EndAddress);
+                delete methodBlock2;
             }
 
         } else if (FlyScriptParser::WhileStmtContext *whileStmtContext = dynamic_cast<FlyScriptParser::WhileStmtContext *>(stmtContext)) {
             auto expr = dynamic_cast<FlyScriptParser::ExprContext *>(whileStmtContext->children[2]);
+            int judgeStartAddress = methodBlock->nextCodeAddress();
             int finalRegister = 0;
             if (FlyScriptParser::OrBooleanExprContext *orBooleanExprContext = dynamic_cast<FlyScriptParser::OrBooleanExprContext *>(expr)) {
                 finalRegister = 0;
             } else {
-                finalRegister = getExprRegister(expr, ValueType::T_boolean, methodRegister);
+                ExprResult exprResultA = getExprResult(expr, ValueType::T_boolean, methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                finalRegister = exprResultA.resultRegister;
             }
-            int ifStartAddress = methodRegister->currentCodeAddress();
-            methodRegister->prepareInstruction(2);
-            int blockStartAddress = methodRegister->currentCodeAddress();
+            IfInstruction *ifInstruction = new IfInstruction(finalRegister, -1);
+            GotoInstruction *gotoInstruction = new GotoInstruction(-1);
+            methodBlock->addInstruction(ifInstruction);
+            methodBlock->addInstruction(gotoInstruction);
+
+            int blockStartAddress = methodBlock->nextCodeAddress();
+            ifInstruction->setAddress(blockStartAddress);
+
             auto *block = dynamic_cast<FlyScriptParser::BlockContext *>(whileStmtContext->children[4]);
-            auto childMethodRegister = new MethodRegister(methodRegister);
-            parseBlock(block, childMethodRegister);
-            int blockInstructionCount = childMethodRegister->getInstructions().size();
-            int blockEndAddress = blockStartAddress + blockInstructionCount;
+            auto whileBlock = methodBlock->newChildBlock();
+            whileBlock->setIsWhileBlock(true);
+            parseBlock(block, whileBlock);
+            int blockInstructionCount = whileBlock->getInstructions().size();
             if (blockInstructionCount == 0) {
                 continue;
             }
-            methodRegister->patchPreparedInstruction(new IfInstruction(finalRegister, blockStartAddress));
-            methodRegister->patchPreparedInstruction(new GotoInstruction(blockEndAddress));
-
-            for (Instruction *instruction: childMethodRegister->getInstructions()) {
-                methodRegister->addInstruction(instruction);
+            GotoInstruction *gotoBreakInstruction = nullptr;
+            if (whileBlock->getBreakCodeAddress() >= 0) {
+                //BreakInstruction *breakInstruction= dynamic_cast<BreakInstruction *>(whileBlock->getInstructions()[whileBlock->getBreakCodeAddress()]);
+                gotoBreakInstruction = new GotoInstruction(-1);
+                whileBlock->replaceInstruction(whileBlock->getBreakCodeAddress(), gotoBreakInstruction);
+                whileBlock->setBreakCodeAddress(-1);
             }
-            delete childMethodRegister;
-            methodRegister->addInstruction(new GotoInstruction(ifStartAddress));
+            for (Instruction *instruction: whileBlock->getInstructions()) {
+                methodBlock->addInstruction(instruction);
+            }
+            methodBlock->addInstruction(new GotoInstruction(judgeStartAddress));
+            int blockEndAddress = methodBlock->nextCodeAddress();
+            gotoInstruction->setAddress(blockEndAddress);
+            if (gotoBreakInstruction != nullptr) {
+                gotoBreakInstruction->setAddress(blockEndAddress);
+            }
+            delete whileBlock;
         } else if (FlyScriptParser::BreakStmtContext *breakStmtContext = dynamic_cast<FlyScriptParser::BreakStmtContext *>(stmtContext)) {
-
+            methodBlock->addInstruction(new BreakInstruction());
+            auto *whileBlock = methodBlock->findWhileBlock();
+            int breakAddress = whileBlock->nextCodeAddressForChild() + methodBlock->currentCodeAddressForChild();
+            if (whileBlock == nullptr) {
+                throw CompileException("break or continue must be in the while block");
+            } else {
+                whileBlock->setBreakCodeAddress(breakAddress);
+            }
         } else if (FlyScriptParser::ReturnStmtContext *returnStmtContext = dynamic_cast<FlyScriptParser::ReturnStmtContext *>(stmtContext)) {
             auto valueExpr = dynamic_cast<FlyScriptParser::ExprContext *>(returnStmtContext->children[1]);
             if (valueExpr) {
-                int exprType = methodRegister->getExprType(valueExpr);
-                int reg = getExprRegister(valueExpr, exprType, methodRegister);
-                methodRegister->addInstruction(new ReturnInstruction(reg, exprType == ValueType::T_void));
+                int exprType = methodBlock->state->getExprType(valueExpr);
+                ExprResult exprResultA = getExprResult(valueExpr, exprType, methodBlock);
+                exprResultA.commitInstruction(methodBlock);
+                int reg = exprResultA.resultRegister;
+                methodBlock->addInstruction(new ReturnInstruction(reg, exprType == ValueType::T_void));
             } else {
-                methodRegister->addInstruction(new ReturnInstruction());
+                methodBlock->addInstruction(new ReturnInstruction());
             }
         }
-
-
     }
 }
 
-int
-Ast2IrConvertor::getExprRegister(FlyScriptParser::ExprContext *exprContext, int type, MethodRegister *methodRegister) {
+ExprResult
+Ast2IrConvertor::getExprResult(FlyScriptParser::ExprContext *exprContext, int type, MethodBlock *methodBlock) {
+    ExprResult exprResult = ExprResult();
     if (FlyScriptParser::IdentifierExprContext *identifierExprContext = dynamic_cast<FlyScriptParser::IdentifierExprContext *>(exprContext)) {
         string variableName = identifierExprContext->children[0]->getText();
-        if (methodRegister->isFieldVariable(variableName)) {
-            int getFieldRegister = methodRegister->newRegister();
-            methodRegister->addInstruction(new GetFieldInstruction(getFieldRegister, variableName));
-            return getFieldRegister;
+        if (methodBlock->state->isFieldVariable(variableName)) {
+            int getFieldRegister = methodBlock->state->newRegister();
+            exprResult.addInstruction(new GetFieldInstruction(getFieldRegister, variableName));
+            exprResult.setResultRegister(getFieldRegister);
+            return exprResult;
         } else {
-            int variableRegister = methodRegister->getRegister(variableName);
+            int variableRegister = methodBlock->state->getRegister(variableName);
             if (!variableRegister) {
                 throw NonRegisterException(variableName.data());
             }
-            return variableRegister;
+            exprResult.setResultRegister(variableRegister);
+            return exprResult;
         }
     } else if (FlyScriptParser::PlusSubExprContext *plusSubExprContext = dynamic_cast<FlyScriptParser::PlusSubExprContext *>(exprContext)) {
         auto expr1 = dynamic_cast<FlyScriptParser::ExprContext *>(plusSubExprContext->children[0]);
         auto symbol = dynamic_cast<TerminalNodeImpl *>(plusSubExprContext->children[1])->getText();
         auto expr2 = dynamic_cast<FlyScriptParser::ExprContext *>(plusSubExprContext->children[2]);
         if (strcmp(symbol.data(), "+") == 0) {
-            auto type1 = methodRegister->getExprType(expr1);
-            auto type2 = methodRegister->getExprType(expr2);
-            auto register1 = getExprRegister(expr1, type1, methodRegister);
-            auto register2 = getExprRegister(expr2, type2, methodRegister);
-            methodRegister->addInstruction(new PlusInstruction(register1, register2));
-            int resultRegister = methodRegister->newRegister();
-            methodRegister->addInstruction(new MoveResultObjectInstruction(resultRegister));
-            return resultRegister;
+            auto type1 = methodBlock->state->getExprType(expr1);
+            auto type2 = methodBlock->state->getExprType(expr2);
+            ExprResult exprResult1 = getExprResult(expr1, type1, methodBlock);
+            exprResult1.commitInstruction(exprResult);
+            ExprResult exprResult2 = getExprResult(expr2, type2, methodBlock);
+            exprResult2.commitInstruction(exprResult);
+            auto register1 = exprResult1.resultRegister;
+            auto register2 = exprResult2.resultRegister;
+            exprResult.addInstruction(new PlusInstruction(register1, register2));
+            int resultRegister = methodBlock->state->newRegister();
+            exprResult.addInstruction(new MoveResultObjectInstruction(resultRegister));
+            exprResult.setResultRegister(resultRegister);
+            return exprResult;
         } else if (strcmp(symbol.data(), "-") == 0) {
-            if (methodRegister->plusSubTypeInference->isStringAndString(expr1, expr2)) {
+            if (methodBlock->state->plusSubTypeInference->isStringAndString(expr1, expr2)) {
                 throw RuntimeException("Strings cannot be subtracted");
             }
-            if (methodRegister->plusSubTypeInference->isIntAndString(expr1, expr2)) {
-                throw RuntimeException("Strings and numbers cannot be added");
+            if (methodBlock->state->plusSubTypeInference->isIntAndString(expr1, expr2)) {
+                throw RuntimeException("Strings and numbers cannot be subtracted");
             }
+            if (methodBlock->state->plusSubTypeInference->isContainsString(expr1, expr2)) {
+                throw RuntimeException("Strings cannot be in sub instruction");
+            }
+            auto type1 = methodBlock->state->getExprType(expr1);
+            auto type2 = methodBlock->state->getExprType(expr2);
+            ExprResult exprResult1 = getExprResult(expr1, type1, methodBlock);
+            exprResult1.commitInstruction(exprResult);
+            ExprResult exprResult2 = getExprResult(expr2, type2, methodBlock);
+            exprResult2.commitInstruction(exprResult);
+            auto register1 = exprResult1.resultRegister;
+            auto register2 = exprResult2.resultRegister;
+            exprResult.addInstruction(new SubInstruction(register1, register2));
+            int resultRegister = methodBlock->state->newRegister();
+            exprResult.addInstruction(new MoveResultObjectInstruction(resultRegister));
+            exprResult.setResultRegister(resultRegister);
+            return exprResult;
         }
     } else if (FlyScriptParser::BooleanExprContext *booleanExprContext = dynamic_cast<FlyScriptParser::BooleanExprContext *>(exprContext)) {
         auto expr1 = dynamic_cast<FlyScriptParser::ExprContext *>(booleanExprContext->children[0]);
         auto symbol = dynamic_cast<FlyScriptParser::JudgeSymbolContext *>(booleanExprContext->children[1])->getText();
         auto expr2 = dynamic_cast<FlyScriptParser::ExprContext *>(booleanExprContext->children[2]);
-        auto type1 = methodRegister->getExprType(expr1);
-        auto type2 = methodRegister->getExprType(expr2);
-        auto register1 = getExprRegister(expr1, type1, methodRegister);
-        auto register2 = getExprRegister(expr2, type2, methodRegister);
-        methodRegister->addInstruction(
+        auto type1 = methodBlock->state->getExprType(expr1);
+        auto type2 = methodBlock->state->getExprType(expr2);
+        ExprResult exprResult1 = getExprResult(expr1, type1, methodBlock);
+        exprResult1.commitInstruction(exprResult);
+        ExprResult exprResult2 = getExprResult(expr2, type2, methodBlock);
+        exprResult2.commitInstruction(exprResult);
+        auto register1 = exprResult1.resultRegister;
+        auto register2 = exprResult2.resultRegister;
+        exprResult.addInstruction(
                 new BoolInstruction(register1, BoolInstruction::getSymbolByName(symbol), register2));
-        int resultRegister = methodRegister->newRegister();
-        methodRegister->addInstruction(new MoveResultObjectInstruction(resultRegister));
-        return resultRegister;
+        int resultRegister = methodBlock->state->newRegister();
+        exprResult.addInstruction(new MoveResultObjectInstruction(resultRegister));
+        exprResult.setResultRegister(resultRegister);
+        return exprResult;
     } else if (FlyScriptParser::InvokeExprContext *invokeExprContext = dynamic_cast<FlyScriptParser::InvokeExprContext *>(exprContext)) {
         string methodName = dynamic_cast<TerminalNodeImpl *>(invokeExprContext->children[0])->getText();
         int returnType = typeInClassRemember->getMethodReturnType(methodName);
@@ -238,8 +291,10 @@ Ast2IrConvertor::getExprRegister(FlyScriptParser::ExprContext *exprContext, int 
         if (exprListContext) {
             for (int i = 0; i < exprListContext->children.size(); i++) {
                 if (FlyScriptParser::ExprContext *childExpr = dynamic_cast<FlyScriptParser::ExprContext *>(exprListContext->children[i])) {
-                    int exprType = methodRegister->getExprType(childExpr);
-                    int reg = getExprRegister(childExpr, exprType, methodRegister);
+                    int exprType = methodBlock->state->getExprType(childExpr);
+                    ExprResult exprResult1 = getExprResult(childExpr, exprType, methodBlock);
+                    exprResult1.commitInstruction(exprResult);
+                    int reg = exprResult1.resultRegister;
                     paramRegList.push_back(reg);
                 } else if (TerminalNodeImpl *splitSymbol = dynamic_cast<TerminalNodeImpl *>(exprListContext->children[i])) {
                     string symbol = splitSymbol->getText();
@@ -251,41 +306,50 @@ Ast2IrConvertor::getExprRegister(FlyScriptParser::ExprContext *exprContext, int 
                 }
             }
         }
-        methodRegister->addInstruction(new InvokeInstruction(methodName, paramRegList));
+        exprResult.addInstruction(new InvokeInstruction(methodName, paramRegList));
         if (returnType != ValueType::T_void) {
-            int invokeResultRegister = methodRegister->newRegister();
-            methodRegister->addInstruction(new MoveResultObjectInstruction(invokeResultRegister));
-            return invokeResultRegister;
+            int invokeResultRegister = methodBlock->state->newRegister();
+            exprResult.addInstruction(new MoveResultObjectInstruction(invokeResultRegister));
+            exprResult.setResultRegister(invokeResultRegister);
+            return exprResult;
         }
-        return -1;
+        exprResult.setResultRegister(-1);
+        return exprResult;
     } else if (FlyScriptParser::BooleanTrueExprContext *booleanTrueExprContext = dynamic_cast<FlyScriptParser::BooleanTrueExprContext *>(exprContext)) {
-        int registerA = methodRegister->newRegister();
-        methodRegister->addInstruction(new ConstBooleanInstruction(registerA, true));
-        return registerA;
+        int registerA = methodBlock->state->newRegister();
+        exprResult.addInstruction(new ConstBooleanInstruction(registerA, true));
+        exprResult.setResultRegister(registerA);
+        return exprResult;
     } else if (FlyScriptParser::BooleanFalseExprContext *booleanFalseExprContext = dynamic_cast<FlyScriptParser::BooleanFalseExprContext *>(exprContext)) {
-        int registerA = methodRegister->newRegister();
-        methodRegister->addInstruction(new ConstBooleanInstruction(registerA, true));
-        return registerA;
+        int registerA = methodBlock->state->newRegister();
+        exprResult.addInstruction(new ConstBooleanInstruction(registerA, true));
+        exprResult.setResultRegister(registerA);
+        return exprResult;
+    } else if (FlyScriptParser::ParensExprContext *parensExprContext = dynamic_cast<FlyScriptParser::ParensExprContext *>(exprContext)) {
+        FlyScriptParser::ExprContext *exprInParens = dynamic_cast<FlyScriptParser::ExprContext *>(parensExprContext->children[1]);
+        return getExprResult(exprInParens,type,methodBlock);
     }
     switch (type) {
         case ValueType::T_int: {
             if (FlyScriptParser::IntExprContext *intExprContext = dynamic_cast<FlyScriptParser::IntExprContext *>(exprContext)) {
-                int registerA = methodRegister->newRegister();
+                int registerA = methodBlock->state->newRegister();
                 string text = intExprContext->getText();
-                methodRegister->addInstruction(new ConstIntInstruction(registerA, stoi(text.data())));
-                return registerA;
+                exprResult.addInstruction(new ConstIntInstruction(registerA, stoi(text.data())));
+                exprResult.setResultRegister(registerA);
+                return exprResult;
             }
         }
         case ValueType::T_string: {
             if (FlyScriptParser::StringExprContext *stringExprContext = dynamic_cast<FlyScriptParser::StringExprContext *>(exprContext)) {
-                int registerA = methodRegister->newRegister();
+                int registerA = methodBlock->state->newRegister();
                 string text = stringExprContext->children[1]->getText();
-                methodRegister->addInstruction(new ConstStringInstruction(registerA, text.data()));
-                return registerA;
+                exprResult.addInstruction(new ConstStringInstruction(registerA, text.data()));
+                exprResult.setResultRegister(registerA);
+                return exprResult;
             }
         }
     }
-    throw CompileException("this exprContext is support");
+    throw CompileException("this exprContext is unsupported");
 }
 
 FileClass *Ast2IrConvertor::generateFileClass() {
@@ -312,8 +376,7 @@ FileClass *Ast2IrConvertor::generateFileClass() {
         }
     }
 
-    auto *mainMethodRegister = new MethodRegister(this);
-
+    auto *mainMethodBlock = new MethodBlock(this->typeInClassRemember);
     for (FlyScriptParser::FieldContext *fieldContext: rawFieldList) {
         string typeString = Ast2IrConvertor::typeContextToString(
                 dynamic_cast<FlyScriptParser::TypeContext *>(fieldContext->children[0]));
@@ -322,10 +385,10 @@ FileClass *Ast2IrConvertor::generateFileClass() {
         typeInClassRemember->putFieldType(fieldName, type);
         fileClass->addField(new IrField(fieldName, type));
     }
-
-    parseStmt(rawStmtList, mainMethodRegister);
+    parseStmt(rawStmtList, mainMethodBlock);
     IrMethod *mainMethod = new IrMethod(ValueType::T_void, "main", vector<MethodParameter *>(),
-                                        mainMethodRegister->getInstructions());
+                                        mainMethodBlock->getInstructions());
+    delete mainMethodBlock;
     fileClass->addMethod(mainMethod);
 
     for (FlyScriptParser::FunctionContext *functionContext: rawFunctionList) {
@@ -334,7 +397,6 @@ FileClass *Ast2IrConvertor::generateFileClass() {
         fileClass->addMethod(method);
     }
 
-    delete mainMethodRegister;
     return fileClass;
 }
 

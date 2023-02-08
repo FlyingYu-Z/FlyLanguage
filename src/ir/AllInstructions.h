@@ -6,6 +6,7 @@
 #define FLYLANGUAGE_ALLINSTRUCTIONS_H
 
 #include "NopInstruction.h"
+#include "BreakInstruction.h"
 #include "ConstStringInstruction.h"
 #include "ConstIntInstruction.h"
 #include "ConstFloatInstruction.h"

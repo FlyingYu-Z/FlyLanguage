@@ -1,0 +1,11 @@
+
+int result=test1();
+println("result->"+result);
+println("result2->"+test1());
+println("result3->"+(test1()+3));
+
+int test1(){
+int a=1;
+int b=2;
+return a+b;
+}

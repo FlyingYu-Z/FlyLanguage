@@ -28,6 +28,7 @@ X_OPCODE(Goto,"goto", 0x014)\
 X_OPCODE(SetField,"set-field", 0x015)\
 X_OPCODE(GetField,"get-field", 0x016)\
 X_OPCODE(Return,"return", 0x017)\
+X_OPCODE(Break, "nop-break", 0x018) \
 
 class Opcode {
 public:
